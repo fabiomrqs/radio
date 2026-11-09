@@ -80,8 +80,10 @@ const ROUTES = {
   personalizar: { screen: 'personalizar', title: 'Nome da rádio', back: 'quiz', guard: () => canMakeRadio() && quizComplete() ? true : 'quiz' },
   radio:        { screen: 'radio', title: 'Sua rádio', back: 'inicio', guard: () => !!state.radio },
 };
-const isPromo = () => status.phase === 'promo';
-const canMakeRadio = () => (status.phase === 'promo' ? !!state.participationId : ['encerrada', 'resultado'].includes(status.phase));
+/* Antes do início ('pre') o fluxo de participação fica liberado no front para testes.
+   O backend deve recusar envios fora do período com 403 promo_closed. */
+const isPromo = () => ['pre', 'promo'].includes(status.phase);
+const canMakeRadio = () => (isPromo() ? !!state.participationId : ['encerrada', 'resultado'].includes(status.phase));
 function homeScreen() {
   if (status.phase === 'arquivo') return 'home-arquivo';
   if (['encerrada', 'resultado'].includes(status.phase)) return 'home-pos';
@@ -140,17 +142,8 @@ window.addEventListener('hashchange', render);
    ============================================================ */
 function enterHome() {
   setText('periodo', `Participações de ${D.start} a ${D.end}. Resultado revelado nesta página em ${D.result}.`);
-  const cta = $('#ctaParticipate');
-  const pre = status.phase === 'pre';
-  cta.setAttribute('aria-disabled', pre ? 'true' : 'false');
-  if (pre) cta.setAttribute('tabindex', '-1'); else cta.removeAttribute('tabindex');
-  $('#preStartMsg').hidden = !pre;
-  $('#preStartMsg').textContent = pre ? `As participações abrem em ${D.start}. Volta aqui pra pisar fundo!` : '';
 }
-$('#ctaParticipate').addEventListener('click', (e) => {
-  if (status.phase === 'pre') { e.preventDefault(); return; }
-  track('cta_participar');
-});
+$('#ctaParticipate').addEventListener('click', () => track('cta_participar'));
 
 function enterHomePos() {
   const hasWinner = !!status.winner;
@@ -400,11 +393,11 @@ async function ensureQuiz() { if (!quiz) quiz = await api.getQuiz(); return quiz
 const quizComplete = () => !!quiz && quiz.questions.every((q) => state.quizAnswers[q.id]);
 function quizBack() {
   if (state.quizStep > 0) { set({ quizStep: state.quizStep - 1 }); renderQuestion(); return null; }
-  return status.phase === 'promo' ? 'confirmado' : 'inicio';
+  return isPromo() ? 'confirmado' : 'inicio';
 }
 
 async function enterQuiz() {
-  $('#quizKicker').textContent = status.phase === 'promo' ? 'Enquanto o resultado não é revelado' : 'Monte sua rádio';
+  $('#quizKicker').textContent = isPromo() ? 'Enquanto o resultado não é revelado' : 'Monte sua rádio';
   const box = $('#quizState');
   if (!quiz) {
     box.innerHTML = '<div class="stack gap-10"><div class="skeleton"></div><div class="skeleton"></div></div>';
@@ -556,7 +549,7 @@ function enterRadio() {
   });
   $('#lineupBlock').hidden = !(r.artists || []).length;
 
-  $('#radioFoot').textContent = status.phase === 'promo'
+  $('#radioFoot').textContent = isPromo()
     ? `O resultado do concurso será revelado nesta página em ${D.result}.`
     : 'Bom jogo! Manda sua rádio pro seu bonde.';
 
