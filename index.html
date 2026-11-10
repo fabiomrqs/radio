@@ -149,6 +149,7 @@
     <hr class="divider">
     <fieldset class="quiz-fieldset">
       <legend><h2 class="h2">Agora, escolha a faixa da trilha para a sua gameplay:</h2></legend>
+      <p class="small" style="margin-bottom:6px">Dê o play pra ouvir e marque a bolinha da sua escolhida.</p>
       <div id="tracksState" aria-live="polite"></div>
       <ul class="tracks" id="trackList"></ul>
     </fieldset>
@@ -171,11 +172,7 @@
     </div>
     <h1 class="h1" id="t-resposta">Por que essa é a música do GTA VI: The Album perfeita para acompanhar a sua gameplay?</h1>
     <div class="picked">
-      <span class="track-cover" id="answerCover" aria-hidden="true">[CAPA]</span>
-      <div style="flex:1;min-width:0">
-        <strong id="answerTitle" style="display:block"></strong>
-        <span id="answerArtist" class="small" style="display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis"></span>
-      </div>
+      <div class="picked-player" id="answerPlayer"></div>
       <a class="link-btn" href="#musica">Trocar</a>
     </div>
     <div class="field">

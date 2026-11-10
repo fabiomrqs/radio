@@ -230,38 +230,23 @@ main { flex: 1; }
 .track:hover { border-color: var(--line-soft); }
 .track:has(input:checked) { background: var(--surface-hi); border-color: var(--accent); }
 .track:has(input:focus-visible) { outline: 3px solid var(--cream); outline-offset: 2px; }
-.track-row { display: flex; align-items: center; gap: 4px; padding-right: 6px; }
-.track-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 12px; padding: 12px; cursor: pointer; }
 .radio-dot { width: 24px; height: 24px; flex-shrink: 0; border-radius: 50%; border: 2px solid #9587B3; display: flex; align-items: center; justify-content: center; }
 .track:has(input:checked) .radio-dot { border-color: var(--accent); }
 .track:has(input:checked) .radio-dot::after { content: ""; width: 12px; height: 12px; border-radius: 50%; background: var(--accent); }
-.track-cover { width: 56px; height: 56px; flex-shrink: 0; border-radius: 6px; object-fit: cover; background: var(--line); display: flex; align-items: center; justify-content: center; font-size: 9px; color: var(--text-3); }
-.track-cover { font-family: var(--font-display); font-weight: 800; font-size: 14px; color: var(--cream); overflow: hidden; }
 .track.is-soon { opacity: .62; }
-.track.is-soon .track-main { cursor: not-allowed; }
 .track.is-soon:hover { border-color: var(--surface); }
 .track.is-soon .radio-dot { border-style: dashed; }
-.soon-badge { flex-shrink: 0; margin-right: 8px; padding: 5px 10px; border-radius: var(--radius-pill); border: 1px solid var(--cream); color: var(--cream); font-family: var(--font-display); font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; white-space: nowrap; }
-.track-meta { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
-.track-title { font-weight: 700; font-size: 15px; }
-.track-artist { font-size: 13px; color: var(--text-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.track-play {
-  width: 44px; height: 44px; flex-shrink: 0; border-radius: 50%; border: 1.5px solid var(--line-soft);
-  background: transparent; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--cream);
-}
-.track-play:hover { background: var(--bg); border-color: var(--cream); }
-.track-play .ico-pause, .track-play .spinner { display: none; }
-.track-play[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--bg); }
-.track-play[aria-pressed="true"] .ico-play { display: none; }
-.track-play[aria-pressed="true"] .ico-pause { display: block; }
-.track-play.is-loading .ico-play, .track-play.is-loading .ico-pause { display: none; }
-.track-play.is-loading .spinner { display: inline-block; width: 16px; height: 16px; }
-.track-progress { height: 3px; margin: 0 14px; border-radius: 2px; background: transparent; overflow: hidden; }
-.track.is-playing .track-progress { background: rgba(255, 255, 255, .12); margin-bottom: 10px; }
-.track-progress span { display: block; height: 100%; width: 0; background: var(--accent); transition: width .5s linear; }
-.track-embed { padding: 0 12px 12px; }
-.track-embed iframe { width: 100%; height: 80px; border: 0; border-radius: var(--radius-m); }
-.skeleton { background: linear-gradient(90deg, var(--surface) 25%, var(--surface-hi) 50%, var(--surface) 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; border-radius: var(--radius-l); height: 84px; }
+.soon-badge { flex-shrink: 0; margin-right: 4px; padding: 5px 10px; border-radius: var(--radius-pill); border: 1px solid var(--cream); color: var(--cream); font-family: var(--font-display); font-size: 10px; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase; white-space: nowrap; }
+.track-row { display: flex; align-items: stretch; gap: 0; padding: 0; }
+.track-pick { width: 56px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; cursor: pointer; border-radius: var(--radius-l) 0 0 var(--radius-l); }
+.track-pick:hover .radio-dot { border-color: var(--cream); }
+.track-player { flex: 1; min-width: 0; padding: 8px 8px 8px 0; }
+.track-player iframe, .picked-player iframe { display: block; width: 100%; height: 80px; border: 0; border-radius: var(--radius-m); background: var(--bg-deep); }
+.soon-row { min-height: 80px; display: flex; align-items: center; gap: 10px; padding: 0 8px; }
+.soon-name { flex: 1; min-width: 0; font-weight: 700; font-size: 15px; color: var(--text-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.track.is-soon .track-pick { cursor: not-allowed; }
+.picked-player { flex: 1; min-width: 0; }
+.skeleton { background: linear-gradient(90deg, var(--surface) 25%, var(--surface-hi) 50%, var(--surface) 75%); background-size: 200% 100%; animation: shimmer 1.2s infinite; border-radius: var(--radius-l); height: 100px; }
 @keyframes shimmer { to { background-position: -200% 0; } }
 .state-box { padding: 20px; border: 1px solid var(--line); border-radius: var(--radius-m); display: flex; flex-direction: column; gap: 12px; align-items: flex-start; }
 

@@ -8,7 +8,6 @@ import { state, set, resetRadio } from './store.js';
 import { masks, validateField, parseBirthDate, onlyDigits } from './validation.js';
 import { isBlocked } from './profanity.js';
 import { track } from './analytics.js';
-import { toggle as togglePlayer, pause as pausePlayer, onPlayerChange } from './player.js';
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -114,7 +113,6 @@ function render() {
   document.title = route.title === ROUTES.inicio.title ? route.title : `${route.title} | Rádio GTA VI: The Album`;
   $('#headerBack').hidden = !route.back;
 
-  if (screenId !== 'musica') pausePlayer();
   const enter = SCREEN_ENTER[screenId];
   if (enter) enter();
 
@@ -195,8 +193,8 @@ const trackLabel = (t) => t.title || `Faixa ${t.n}`;
 const canPick = (t) => t.released || CONFIG.features.unreleasedSelectable;
 
 /**
- * Se o tracks.json ainda não tem título, tenta buscar no oEmbed público do Spotify.
- * Se não der (rede/CORS), a faixa aparece como “Faixa N” até o tracks.json ser preenchido.
+ * O nome da faixa só é usado em “Sua faixa: …” e para leitores de tela (o player do Spotify já mostra título,
+ * artista e capa). Se o tracks.json não tiver título, tenta o oEmbed público do Spotify; senão fica “Faixa N”.
  */
 async function enrichFromSpotify(t, li) {
   try {
@@ -205,33 +203,23 @@ async function enrichFromSpotify(t, li) {
     const o = await res.json();
     if (!o.title) throw new Error('sem título');
     t.title = o.title;
-    if (!t.coverUrl && o.thumbnail_url) t.coverUrl = o.thumbnail_url;
-    paintTrackMeta(t, li);
+    labelTrack(t, li);
     if (state.trackId === t.id) syncTrackSelection();
   } catch (_) { /* mantém “Faixa N” */ }
 }
-function paintTrackMeta(t, li) {
-  $('.track-title', li).textContent = trackLabel(t);
-  $('.track-artist', li).textContent = t.artist || '';
-  $('input', li).setAttribute('aria-label', [trackLabel(t), t.artist, t.released ? '' : 'em breve'].filter(Boolean).join(', '));
-  const cover = $('.track-cover', li);
-  if (t.coverUrl && cover.tagName !== 'IMG') {
-    const img = new Image(); img.src = t.coverUrl; img.alt = ''; img.className = 'track-cover'; img.loading = 'lazy';
-    img.width = 56; img.height = 56;
-    cover.replaceWith(img);
-  }
+function labelTrack(t, li) {
+  const name = [trackLabel(t), t.artist].filter(Boolean).join(', ');
+  $('input', li).setAttribute('aria-label', `Escolher ${name}${t.released ? '' : ' (em breve)'}`);
+  const f = $('iframe', li);
+  if (f) f.title = `Player do Spotify: ${name}`;
 }
-/** Plano B: mostra o player do Spotify na linha quando o navegador bloqueia o play por código. */
-function openEmbed(t, li) {
-  const play = $('.track-play', li), embed = $('.track-embed', li);
-  if (!play || !t.spotifyEmbedUrl) return;
-  embed.hidden = false;
-  if (!embed.childElementCount) {
-    const f = document.createElement('iframe');
-    f.src = t.spotifyEmbedUrl; f.loading = 'lazy'; f.title = `Prévia de ${trackLabel(t)} no Spotify`;
-    f.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
-    embed.appendChild(f);
-  }
+function spotifyIframe(t) {
+  const f = document.createElement('iframe');
+  f.src = t.spotifyEmbedUrl;
+  f.loading = 'lazy';
+  f.width = '100%'; f.height = '80';
+  f.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
+  return f;
 }
 
 function renderTracks() {
@@ -242,65 +230,32 @@ function renderTracks() {
     li.className = 'track' + (t.released ? '' : ' is-soon');
     li.innerHTML = `
       <div class="track-row">
-        <label class="track-main">
+        <label class="track-pick">
           <input class="sr-only" type="radio" name="track">
           <span class="radio-dot" aria-hidden="true"></span>
-          <span class="track-cover" aria-hidden="true"></span>
-          <span class="track-meta"><span class="track-title"></span><span class="track-artist"></span></span>
         </label>
-        ${t.released ? `<button class="track-play" type="button" aria-pressed="false">
-          <svg class="ico-play" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
-          <svg class="ico-pause" width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 5h4v14H7zM13 5h4v14h-4z"/></svg>
-          <span class="spinner" aria-hidden="true"></span>
-        </button>` : '<span class="soon-badge">Em breve</span>'}
-      </div>
-      <div class="track-progress" aria-hidden="true"><span></span></div>
-      <div class="track-embed" hidden></div>`;
-    li.dataset.trackId = t.id;
+        <div class="track-player"></div>
+      </div>`;
     const input = $('input', li);
     input.value = t.id;
     input.disabled = !canPick(t);
     input.checked = state.trackId === t.id;
     input.addEventListener('change', () => pickTrack(t.id));
-    const cover = $('.track-cover', li);
-    cover.textContent = String(t.n).padStart(2, '0');
-    paintTrackMeta(t, li);
 
-    const play = $('.track-play', li);
-    if (play) {
-      play.setAttribute('aria-label', `Ouvir prévia de ${trackLabel(t)}`);
-      play.addEventListener('click', () => {
-        if (!t.spotifyId) return;
-        togglePlayer(`spotify:track:${t.spotifyId}`);
-        track('ouvir_previa', { track_id: t.id });
-      });
+    const slot = $('.track-player', li);
+    if (t.released && t.spotifyEmbedUrl) {
+      slot.appendChild(spotifyIframe(t));
+    } else {
+      // Ainda não lançada: sem player
+      slot.innerHTML = '<div class="soon-row"><span class="soon-name"></span><span class="soon-badge">Em breve</span></div>';
+      $('.soon-name', slot).textContent = [trackLabel(t), t.artist].filter(Boolean).join(' · ');
     }
+    labelTrack(t, li);
     list.appendChild(li);
     if (!t.title && t.spotifyUrl && t.released) enrichFromSpotify(t, li);
   });
   syncTrackSelection();
 }
-/* Reflete o estado do player nos botões de play da lista */
-onPlayerChange((p) => {
-  const id = p.uri && tracks?.find((x) => `spotify:track:${x.spotifyId}` === p.uri)?.id;
-  $$('#trackList .track').forEach((li) => {
-    const t = tracks.find((x) => x.id === li.dataset.trackId);
-    const isCurrent = li.dataset.trackId === id;
-    const btn = $('.track-play', li);
-    li.classList.toggle('is-playing', isCurrent && p.playing);
-    if (btn) {
-      btn.classList.toggle('is-loading', isCurrent && p.loading && !p.playing);
-      btn.setAttribute('aria-pressed', String(isCurrent && p.playing));
-      btn.setAttribute('aria-label', `${isCurrent && p.playing ? 'Pausar' : 'Ouvir'} ${trackLabel(t)}`);
-    }
-    const bar = $('.track-progress span', li);
-    if (bar) bar.style.width = isCurrent && p.duration ? `${Math.min(100, (p.position / p.duration) * 100)}%` : '0%';
-    if (isCurrent && p.blocked) {
-      openEmbed(t, li);
-      toast('Toque no play do Spotify pra ouvir a faixa.');
-    }
-  });
-});
 
 function syncTrackSelection() {
   const t = tracks?.find((x) => x.id === state.trackId);
@@ -319,12 +274,16 @@ answer.maxLength = CONFIG.limits.answerMax;
 async function enterAnswer() {
   if (!tracks) { try { tracks = normalizeTracks(await api.getTracks()); } catch (_) { tracks = []; } }
   const t = tracks.find((x) => x.id === state.trackId) || { title: '', artist: '' };
-  $('#answerTitle').textContent = t.n ? trackLabel(t) : '';
-  $('#answerArtist').textContent = t.artist || '';
-  const ac = $('#answerCover');
-  if (ac) {
-    if (t.coverUrl) ac.innerHTML = `<img src="${encodeURI(t.coverUrl)}" alt="" width="56" height="56" style="width:100%;height:100%;object-fit:cover;border-radius:6px">`;
-    else ac.textContent = t.n ? String(t.n).padStart(2, '0') : '';
+  // Mostra o player da faixa escolhida (só recria se a faixa mudou)
+  const slot = $('#answerPlayer');
+  if (slot && slot.dataset.trackId !== t.id) {
+    slot.dataset.trackId = t.id || '';
+    slot.innerHTML = '';
+    if (t.spotifyEmbedUrl) {
+      const f = spotifyIframe(t); f.loading = 'eager';
+      f.title = `Player do Spotify: ${trackLabel(t)}`;
+      slot.appendChild(f);
+    } else if (t.n) slot.textContent = trackLabel(t);
   }
   if (answer.value !== state.answer) answer.value = state.answer;
   updateAnswerCount();
