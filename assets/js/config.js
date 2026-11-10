@@ -38,7 +38,7 @@ export const CONFIG = {
   },
 
   links: {
-    linktree: '#',               // [LINK DO LINKTREE]
+    linktree: 'https://lnk.to/GTAVI_TheAlbum', // botões “Salvar o álbum” e “Ouvir o álbum”
     privacy: '#',                // [LINK DA POLÍTICA DE PRIVACIDADE WARNER]
     /** URL do regulamento para embed via iframe. null = usa rulesHtml abaixo. */
     rulesEmbedUrl: null,
