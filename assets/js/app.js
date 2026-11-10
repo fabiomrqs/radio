@@ -159,15 +159,13 @@ function enterHomePos() {
    Passo 1 – faixas
    ============================================================ */
 let tracks = null;
-let totalInAlbum = 0;
 
 async function enterMusic() {
   if (tracks) { if (!$('#trackList').childElementCount) renderTracks(); else syncTrackSelection(); return; }
   const box = $('#tracksState');
   box.innerHTML = '<div class="stack gap-10" aria-label="Carregando faixas"><div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div></div>';
   try {
-    const res = await api.getTracks();
-    tracks = res.tracks; totalInAlbum = res.totalInAlbum || tracks.length;
+    tracks = normalizeTracks(await api.getTracks());
     box.innerHTML = '';
     renderTracks();
   } catch (err) {
@@ -181,12 +179,67 @@ async function enterMusic() {
   }
 }
 
+/** Padroniza a lista vinda do JSON estático ou do backend. */
+function normalizeTracks(res) {
+  return (res.tracks || []).map((t, i) => ({
+    ...t,
+    n: i + 1,
+    released: t.released !== false,
+    spotifyEmbedUrl: t.spotifyEmbedUrl || (t.spotifyId ? `https://open.spotify.com/embed/track/${t.spotifyId}?utm_source=generator&theme=0` : null),
+    spotifyUrl: t.spotifyUrl || (t.spotifyId ? `https://open.spotify.com/track/${t.spotifyId}` : null),
+  }));
+}
+const trackLabel = (t) => t.title || `Faixa ${t.n}`;
+const canPick = (t) => t.released || CONFIG.features.unreleasedSelectable;
+
+/**
+ * Se o tracks.json ainda não tem título, tenta buscar no oEmbed público do Spotify.
+ * Se não der (rede/CORS), a linha mostra o player do Spotify aberto, que já exibe título e artista.
+ */
+async function enrichFromSpotify(t, li) {
+  try {
+    const res = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(t.spotifyUrl)}`);
+    if (!res.ok) throw new Error(res.status);
+    const o = await res.json();
+    if (!o.title) throw new Error('sem título');
+    t.title = o.title;
+    if (!t.coverUrl && o.thumbnail_url) t.coverUrl = o.thumbnail_url;
+    paintTrackMeta(t, li);
+    if (state.trackId === t.id) syncTrackSelection();
+  } catch (_) {
+    openEmbed(t, li);
+  }
+}
+function paintTrackMeta(t, li) {
+  $('.track-title', li).textContent = trackLabel(t);
+  $('.track-artist', li).textContent = t.artist || '';
+  $('input', li).setAttribute('aria-label', [trackLabel(t), t.artist, t.released ? '' : 'em breve'].filter(Boolean).join(', '));
+  const cover = $('.track-cover', li);
+  if (t.coverUrl && cover.tagName !== 'IMG') {
+    const img = new Image(); img.src = t.coverUrl; img.alt = ''; img.className = 'track-cover'; img.loading = 'lazy';
+    img.width = 56; img.height = 56;
+    cover.replaceWith(img);
+  }
+}
+function openEmbed(t, li) {
+  const play = $('.track-play', li), embed = $('.track-embed', li);
+  if (!play || !t.spotifyEmbedUrl) return;
+  play.setAttribute('aria-expanded', 'true');
+  embed.hidden = false;
+  if (!embed.childElementCount) {
+    const f = document.createElement('iframe');
+    f.src = t.spotifyEmbedUrl; f.loading = 'lazy'; f.title = `Prévia de ${trackLabel(t)} no Spotify`;
+    f.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
+    embed.appendChild(f);
+  }
+}
+
 function renderTracks() {
   const list = $('#trackList');
   list.innerHTML = '';
   tracks.forEach((t) => {
     const li = document.createElement('li');
-    li.className = 'track';
+    li.className = 'track' + (t.released ? '' : ' is-soon');
     li.innerHTML = `
       <div class="track-row">
         <label class="track-main">
@@ -195,56 +248,37 @@ function renderTracks() {
           <span class="track-cover" aria-hidden="true"></span>
           <span class="track-meta"><span class="track-title"></span><span class="track-artist"></span></span>
         </label>
-        <button class="track-play" type="button" aria-expanded="false">
+        ${t.released ? `<button class="track-play" type="button" aria-expanded="false">
           <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M8 5v14l11-7z"/></svg>
-        </button>
+        </button>` : '<span class="soon-badge">Em breve</span>'}
       </div>
       <div class="track-embed" hidden></div>`;
     const input = $('input', li);
     input.value = t.id;
-    input.setAttribute('aria-label', `${t.title}, ${t.artist}`);
+    input.disabled = !canPick(t);
     input.checked = state.trackId === t.id;
     input.addEventListener('change', () => pickTrack(t.id));
-    $('.track-title', li).textContent = t.title;
-    $('.track-artist', li).textContent = t.artist;
     const cover = $('.track-cover', li);
-    if (t.coverUrl) {
-      const img = new Image(); img.src = t.coverUrl; img.alt = ''; img.className = 'track-cover'; img.loading = 'lazy';
-      cover.replaceWith(img);
-    } else cover.textContent = '[CAPA]';
+    cover.textContent = String(t.n).padStart(2, '0');
+    paintTrackMeta(t, li);
 
     const play = $('.track-play', li);
-    const embed = $('.track-embed', li);
-    play.setAttribute('aria-label', `Ouvir prévia de ${t.title}`);
-    play.addEventListener('click', () => {
-      const open = play.getAttribute('aria-expanded') !== 'true';
-      play.setAttribute('aria-expanded', String(open));
-      embed.hidden = !open;
-      // O embed só é carregado quando a pessoa pede, para não pesar a página com 34 iframes.
-      if (open && !embed.childElementCount) {
-        if (t.spotifyEmbedUrl) {
-          const f = document.createElement('iframe');
-          f.src = t.spotifyEmbedUrl; f.loading = 'lazy'; f.title = `Prévia de ${t.title} no Spotify`;
-          f.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
-          embed.appendChild(f);
-        } else {
-          embed.innerHTML = '<div class="placeholder" style="height:80px">[EMBED SPOTIFY]</div>';
-        }
-        track('ouvir_previa', { track_id: t.id });
-      }
-    });
+    if (play) {
+      play.setAttribute('aria-label', `Ouvir prévia de ${trackLabel(t)}`);
+      play.addEventListener('click', () => {
+        const open = play.getAttribute('aria-expanded') !== 'true';
+        if (open) { openEmbed(t, li); track('ouvir_previa', { track_id: t.id }); }
+        else { play.setAttribute('aria-expanded', 'false'); $('.track-embed', li).hidden = true; }
+      });
+    }
     list.appendChild(li);
+    if (!t.title && t.spotifyUrl && t.released) enrichFromSpotify(t, li);
   });
-  if (CONFIG.useMocks && totalInAlbum > tracks.length) {
-    const li = document.createElement('li');
-    li.innerHTML = `<div class="placeholder" style="height:56px">[+ demais faixas do álbum, total de ${totalInAlbum}]</div>`;
-    list.appendChild(li);
-  }
   syncTrackSelection();
 }
 function syncTrackSelection() {
   const t = tracks?.find((x) => x.id === state.trackId);
-  $('#pickedName').textContent = t ? t.title : 'nenhuma ainda';
+  $('#pickedName').textContent = t ? trackLabel(t) : 'nenhuma ainda';
   $('#toAnswer').disabled = !t;
   $$('#trackList input[name="track"]').forEach((i) => { i.checked = i.value === state.trackId; });
 }
@@ -257,10 +291,15 @@ $('#toAnswer').addEventListener('click', () => go('resposta'));
 const answer = $('#answer');
 answer.maxLength = CONFIG.limits.answerMax;
 async function enterAnswer() {
-  if (!tracks) { try { tracks = (await api.getTracks()).tracks; } catch (_) { tracks = []; } }
+  if (!tracks) { try { tracks = normalizeTracks(await api.getTracks()); } catch (_) { tracks = []; } }
   const t = tracks.find((x) => x.id === state.trackId) || { title: '', artist: '' };
-  $('#answerTitle').textContent = t.title;
-  $('#answerArtist').textContent = t.artist;
+  $('#answerTitle').textContent = t.n ? trackLabel(t) : '';
+  $('#answerArtist').textContent = t.artist || '';
+  const ac = $('#answerCover');
+  if (ac) {
+    if (t.coverUrl) ac.innerHTML = `<img src="${encodeURI(t.coverUrl)}" alt="" width="56" height="56" style="width:100%;height:100%;object-fit:cover;border-radius:6px">`;
+    else ac.textContent = t.n ? String(t.n).padStart(2, '0') : '';
+  }
   if (answer.value !== state.answer) answer.value = state.answer;
   updateAnswerCount();
 }
@@ -644,7 +683,7 @@ document.addEventListener('keydown', (e) => {
 async function mountQA() {
   // Preenche o estado com dados de teste para abrir qualquer tela direto
   try {
-    if (!tracks) { const r = await api.getTracks(); tracks = r.tracks; totalInAlbum = r.totalInAlbum; }
+    if (!tracks) tracks = normalizeTracks(await api.getTracks());
     await ensureQuiz();
   } catch (_) {}
   const seed = async (route) => {

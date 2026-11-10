@@ -1,0 +1,278 @@
+{
+  "albumUrl": "https://open.spotify.com/album/5BYKG4MHfySZthe2W6r7n4",
+  "_comentario": "Ordem = ordem do álbum. title/artist vazios são preenchidos pelo script scripts/atualizar-faixas.mjs ou à mão. released=false mostra a faixa como 'Em breve'.",
+  "tracks": [
+    {
+      "id": "t01",
+      "spotifyId": "171rxWDjFvjPeFjSHF4WS5",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t02",
+      "spotifyId": "45TB2WNxWu2X4MmqmCAJnF",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t03",
+      "spotifyId": "5tLZfwzwK8KxoBsNwbNFDI",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t04",
+      "spotifyId": "2QrLrUqdSg5njDVEqq5QFp",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t05",
+      "spotifyId": "62hqNk13CuFLOpCw1cPMAF",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t06",
+      "spotifyId": "4HCOHRCSQelz2GPX8iTamO",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t07",
+      "spotifyId": "3SLoSFMLOb9jcMsdgyQnOJ",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t08",
+      "spotifyId": "5qGziX9216V8hKJjGg8RtH",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t09",
+      "spotifyId": "2jxAeWwgNBd4XgYPn1POoX",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t10",
+      "spotifyId": "6VDw2mGBIa4csypjOhS6JT",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t11",
+      "spotifyId": "7GtO6G2Iue3yfIYhx36JZn",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t12",
+      "spotifyId": "2gKi3NbZSf7aFjaQ3C94Yj",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t13",
+      "spotifyId": "0wK8ZH0T9lvGiM3AaQDoah",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t14",
+      "spotifyId": "77er9Mx3nLca8RcfpGrgvv",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t15",
+      "spotifyId": "3MHXtz0Qu0ksVGcvlp7Mfu",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t16",
+      "spotifyId": "6OX2yNczMDou6xvQCBmjjl",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t17",
+      "spotifyId": "3ZxGI5giGDjAT2CL2V9p8f",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t18",
+      "spotifyId": "4AUAOxJflfzmblig7NrqGN",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t19",
+      "spotifyId": "4NaBitL0J4PBSODIL1sUg7",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t20",
+      "spotifyId": "0wcHjDyKbllhDc7PpvdtU9",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t21",
+      "spotifyId": "66owIEhGwAjAi2yPmwa2dU",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t22",
+      "spotifyId": "4h3tY2zV4easaHEAbHVmgj",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t23",
+      "spotifyId": "68GADd4qLCU16tgCn2W0F5",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t24",
+      "spotifyId": "1QusS0DZ2KK8ukxsAoFZPK",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t25",
+      "spotifyId": "2Df1qZun61Mrj4xo6ndtTy",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t26",
+      "spotifyId": "1Q8z154tjq6WMJALCOM7gE",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t27",
+      "spotifyId": "4XikHdgDDgZT0jDxJXjz9F",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t28",
+      "spotifyId": "4Fv459S7bhBGbDHJhICbUy",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t29",
+      "spotifyId": "7atOpwxr1aIeRlyGEPNn0C",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t30",
+      "spotifyId": "3g9MD1bGGHDCCB1CbWBhTM",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t31",
+      "spotifyId": "4uJTuWY1iJmyXWUtBPEKKt",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t32",
+      "spotifyId": "2X67K1KTLBg9EU2dMUQC42",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t33",
+      "spotifyId": "2mLHtW9nUOtZPvYcW1iqFo",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    },
+    {
+      "id": "t34",
+      "spotifyId": "2fGCjJeXtoeqEDML2RFhVf",
+      "title": "",
+      "artist": "",
+      "coverUrl": null,
+      "released": true
+    }
+  ]
+}

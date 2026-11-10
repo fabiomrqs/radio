@@ -47,9 +47,23 @@ async function request(method, path, body, { captchaAction } = {}) {
   return data;
 }
 
+/** Lê o JSON estático de faixas (sem cache do navegador entre atualizações). */
+export async function getStaticTracks() {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), CONFIG.requestTimeoutMs);
+  try {
+    const res = await fetch(CONFIG.tracksUrl, { cache: 'no-cache', signal: ctrl.signal });
+    if (!res.ok) throw new ApiError(res.status, 'tracks_unavailable', 'Lista de faixas indisponível.');
+    return await res.json();
+  } catch (err) {
+    if (err instanceof ApiError) throw err;
+    throw new ApiError(0, 'network', 'Falha de conexão.');
+  } finally { clearTimeout(timer); }
+}
+
 const real = {
   getStatus: () => request('GET', '/status'),
-  getTracks: () => request('GET', '/tracks'),
+  getTracks: () => (CONFIG.tracksUrl ? getStaticTracks() : request('GET', '/tracks')),
   getQuiz: () => request('GET', '/quiz'),
   createParticipation: (payload) => request('POST', '/participations', payload, { captchaAction: 'participation' }),
   createRadio: (payload) => request('POST', '/radios', payload, { captchaAction: 'radio' }),

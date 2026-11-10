@@ -63,7 +63,11 @@ export const api = {
       winner: phase === 'resultado' || phase === 'arquivo' ? { displayName: 'Ana S.' } : null,
     };
   },
-  async getTracks() { await wait(500); return { tracks: TRACKS, totalInAlbum: 34 }; },
+  async getTracks() {
+    // Usa a lista real (assets/data/tracks.json) também no modo simulado
+    if (CONFIG.tracksUrl) { const { getStaticTracks } = await import('./api.js'); return getStaticTracks(); }
+    await wait(500); return { tracks: TRACKS };
+  },
   async getQuiz() { await wait(300); return QUIZ; },
   async createParticipation(p) {
     await wait(900);

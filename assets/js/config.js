@@ -9,6 +9,13 @@ export const CONFIG = {
   /** true = usa os dados simulados de mocks.js (sem backend). Em produção: false. */
   useMocks: true,
 
+  /**
+   * Lista de faixas. Com uma URL, o site lê o JSON estático (funciona no GitHub Pages).
+   * Com null, usa GET {apiBase}/tracks do backend (mesmo formato).
+   * Para atualizar títulos e faixas lançadas: node scripts/atualizar-faixas.mjs (ver README).
+   */
+  tracksUrl: 'assets/data/tracks.json',
+
   /** Timeout das chamadas à API, em ms. */
   requestTimeoutMs: 15000,
 
@@ -35,6 +42,8 @@ export const CONFIG = {
     prizePhoto: true,
     /** Painel de QA para revisar telas e fases. Só aparece com ?qa=1 na URL. */
     qaPanel: true,
+    /** false = faixas ainda não lançadas aparecem como “Em breve” e não podem ser escolhidas. */
+    unreleasedSelectable: false,
   },
 
   links: {
