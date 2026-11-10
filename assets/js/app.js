@@ -467,10 +467,13 @@ function selectedCover() {
 async function enterCustomize() {
   await ensureQuiz();
   const { option, cover } = selectedCover();
+  // Prévia da capa é opcional: só preenche se o bloco existir no HTML
   const img = $('#coverThumb');
-  img.src = cover.imageUrl; img.alt = `Capa ${cover.name}`;
-  $('#coverName').textContent = cover.name;
-  $('#coverWhy').textContent = `Definida pela sua resposta: “${option.label}”.`;
+  if (img) { img.src = cover.imageUrl; img.alt = `Capa ${cover.name}`; }
+  const coverName = $('#coverName');
+  if (coverName) coverName.textContent = cover.name;
+  const coverWhy = $('#coverWhy');
+  if (coverWhy) coverWhy.textContent = `Definida pela sua resposta: “${option.label}”.`;
   if (!state.radioName) set({ radioName: `Rádio ${cover.name}` });
   nameInput.value = state.radioName;
   checkName(false);
@@ -549,7 +552,8 @@ function enterRadio() {
   });
   $('#lineupBlock').hidden = !(r.artists || []).length;
 
-  $('#radioFoot').textContent = isPromo()
+  const foot = $('#radioFoot'); // opcional
+  if (foot) foot.textContent = isPromo()
     ? `O resultado do concurso será revelado nesta página em ${D.result}.`
     : 'Bom jogo! Manda sua rádio pro seu bonde.';
 
@@ -569,7 +573,7 @@ $('#shareRadio').addEventListener('click', async () => {
     track('compartilhar_radio', { method: 'clipboard' });
   } catch (_) { toast('Copie o link: ' + data.url); }
 });
-$('#newRadio').addEventListener('click', () => { resetRadio(); go('quiz'); });
+$('#newRadio')?.addEventListener('click', () => { resetRadio(); go('quiz'); });
 
 const SCREEN_ENTER = {
   'home-promo': enterHome,
