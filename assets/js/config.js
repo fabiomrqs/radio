@@ -26,7 +26,7 @@ export const CONFIG = {
   dates: {
     start:   '2026-11-19T00:00:00-03:00', // início das participações
     end:     '2026-12-07T23:59:59-03:00', // fim das participações
-    result:  '2026-12-10T00:00:00-03:00', // divulgação do resultado
+    result:  '2026-12-11T19:00:00-03:00', // divulgação do resultado (data e horário exibidos no site)
     archive: '2026-12-31T00:00:00-03:00', // a partir daqui a home mostra só o resultado
   },
 
@@ -34,7 +34,7 @@ export const CONFIG = {
     answerMax: 500,
     radioNameMax: 100,
     /** Idade mínima para participar, se o regulamento exigir (ex.: 18). null = sem trava no front. */
-    minAge: null,
+    minAge: 18,
   },
 
   features: {
@@ -48,7 +48,9 @@ export const CONFIG = {
 
   links: {
     linktree: 'https://lnk.to/GTAVI_TheAlbum', // botões “Salvar o álbum” e “Ouvir o álbum”
-    privacy: '#',                // [LINK DA POLÍTICA DE PRIVACIDADE WARNER]
+    privacy: 'https://privacy.wmg.com/wmi/privacy/por',
+    /** Endereço da landing usado no texto de compartilhamento. Trocar pelo domínio final quando estiver configurado. */
+    landing: 'https://fabiomrqs.github.io/radio/#inicio',
     /** URL do regulamento para embed via iframe. null = usa rulesHtml abaixo. */
     rulesEmbedUrl: null,
   },
@@ -68,6 +70,9 @@ export const CONFIG = {
    * é enviado no header X-Captcha-Token. O script do provedor deve ser incluído no index.html.
    */
   captcha: { provider: null, siteKey: null },
+
+  /** Número de certificação da promoção, exibido no rodapé. null = mostra “Número da promo”. */
+  promoNumber: null,
 
   timezone: 'America/Sao_Paulo',
 };

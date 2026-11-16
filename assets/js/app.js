@@ -1,5 +1,5 @@
 /**
- * Rádio GTA VI: The Album – aplicação.
+ * Rádio GTAVI: The Album – aplicação.
  * Roteamento por hash (#inicio, #musica…) para funcionar em qualquer hospedagem estática.
  */
 import { CONFIG } from './config.js';
@@ -18,10 +18,17 @@ const QA = CONFIG.features.qaPanel && params.get('qa') === '1';
    Utilidades
    ============================================================ */
 const fmtDay = (iso) => new Intl.DateTimeFormat('pt-BR', { day: '2-digit', month: '2-digit', timeZone: CONFIG.timezone }).format(new Date(iso));
+/** "19h" ou "19h30" no fuso da promoção. */
+const fmtHour = (iso) => {
+  const [h, m] = new Intl.DateTimeFormat('pt-BR', { hour: '2-digit', minute: '2-digit', hour12: false, timeZone: CONFIG.timezone })
+    .format(new Date(iso)).split(':');
+  return `${Number(h)}h${m === '00' ? '' : m}`;
+};
 const D = {
   start: fmtDay(CONFIG.dates.start),
   end: fmtDay(CONFIG.dates.end),
   result: fmtDay(CONFIG.dates.result),
+  resultHour: fmtHour(CONFIG.dates.result),
 };
 function setText(key, value) { $$(`[data-text="${key}"]`).forEach((el) => { el.textContent = value; }); }
 function setLoading(btn, on) {
@@ -42,6 +49,16 @@ function friendlyError(err) {
   if (err.status === 429) return 'Muitas tentativas seguidas. Espere um minuto e tente de novo.';
   if (err.code === 'promo_closed') return 'As participações estão encerradas.';
   return err.message && err.status < 500 ? err.message : 'Nosso servidor não respondeu. Tente de novo em instantes.';
+}
+/** "Noite neon" → "Noite neon FM" (sem duplicar se a pessoa já escreveu FM). */
+const fmName = (name) => (/\bfm$/i.test(String(name).trim()) ? String(name).trim() : `${String(name).trim()} FM`);
+/** Texto de compartilhamento da rádio. Durante a promoção convida a concorrer ao prêmio. */
+function shareText(r) {
+  const landing = CONFIG.links.landing || location.href.split('#')[0];
+  const invite = isPromo()
+    ? `Gostou? Crie a sua também e ainda concorra a um PS5 + GTAVI aqui! ${landing}`
+    : `Gostou? Crie a sua também aqui! ${landing}`;
+  return `Escute ${fmName(r.name)}, a minha rádio GTAVI: The Album ${r.playlistUrl}\n\n${invite}`;
 }
 const firstName = (artist) => artist.split(/,| feat\.| ft\.| & | x /i)[0].trim();
 
@@ -71,12 +88,12 @@ function phaseByDate(now = new Date()) {
    Roteador
    ============================================================ */
 const ROUTES = {
-  inicio:       { screen: () => homeScreen(), title: 'Rádio GTA VI: The Album' },
+  inicio:       { screen: () => homeScreen(), title: 'Rádio GTAVI: The Album' },
   musica:       { screen: 'musica', title: 'Escolha a faixa', back: 'inicio', guard: () => isPromo() },
   resposta:     { screen: 'resposta', title: 'Por que essa faixa', back: 'musica', guard: () => isPromo() && state.trackId ? true : 'musica' },
   cadastro:     { screen: 'cadastro', title: 'Seus dados', back: 'resposta', guard: () => isPromo() && state.trackId && state.answer.trim() ? true : 'resposta' },
   confirmado:   { screen: 'confirmado', title: 'Participação confirmada', guard: () => !!state.participationId },
-  quiz:         { screen: 'quiz', title: 'Monte sua rádio', back: () => quizBack(), guard: () => canMakeRadio() },
+  quiz:         { screen: 'quiz', title: 'Minha rádio', back: () => quizBack(), guard: () => canMakeRadio() },
   personalizar: { screen: 'personalizar', title: 'Nome da rádio', back: 'quiz', guard: () => canMakeRadio() && quizComplete() ? true : 'quiz' },
   radio:        { screen: 'radio', title: 'Sua rádio', back: 'inicio', guard: () => !!state.radio },
 };
@@ -110,7 +127,7 @@ function render() {
 
   const screenId = typeof route.screen === 'function' ? route.screen() : route.screen;
   $$('.screen').forEach((s) => s.classList.toggle('is-active', s.dataset.screen === screenId));
-  document.title = route.title === ROUTES.inicio.title ? route.title : `${route.title} | Rádio GTA VI: The Album`;
+  document.title = route.title === ROUTES.inicio.title ? route.title : `${route.title} | Rádio GTAVI: The Album`;
   $('#headerBack').hidden = !route.back;
 
   const enter = SCREEN_ENTER[screenId];
@@ -141,7 +158,7 @@ window.addEventListener('hashchange', render);
    Home
    ============================================================ */
 function enterHome() {
-  setText('periodo', `Participações de ${D.start} a ${D.end}. Resultado revelado nesta página em ${D.result}.`);
+  setText('periodo', `Participações de ${D.start} a ${D.end}. Resultado revelado nesta página e nas redes da Warner Music Brasil dia ${D.result} às ${D.resultHour}.`);
 }
 $('#ctaParticipate').addEventListener('click', () => track('cta_participar'));
 
@@ -150,7 +167,7 @@ function enterHomePos() {
   $('[data-screen="home-pos"] [data-block="winner"]').hidden = !hasWinner;
   $('[data-screen="home-pos"] [data-block="awaiting"]').hidden = hasWinner;
   setText('posTitle', hasWinner ? 'A cidade já tem um dono' : 'Participações encerradas');
-  setText('awaitingMsg', `O resultado será revelado nesta página em ${D.result}. Segura a ansiedade!`);
+  setText('awaitingMsg', `O resultado será revelado nesta página e nas redes da Warner Music Brasil dia ${D.result} às ${D.resultHour}. Segura a ansiedade!`);
   setText('winnerName', status.winner?.displayName || '');
   setText('closedMsg', `A promoção foi encerrada em ${D.end}. Valeu a todos que encararam o desafio!`);
 }
@@ -311,7 +328,7 @@ $('#toForm').addEventListener('click', () => {
 const form = $('#participationForm');
 const FIELD_NAMES = ['nome', 'nascimento', 'cpf', 'email', 'telefone', 'cidade'];
 /** Nome do campo no backend → nome do campo no formulário (para erros 422). */
-const BACKEND_FIELD = { name: 'nome', birthDate: 'nascimento', cpf: 'cpf', email: 'email', phone: 'telefone', city: 'cidade', consents: 'aceites' };
+const BACKEND_FIELD = { name: 'nome', ageConfirmed: 'aceites', birthDate: 'nascimento', cpf: 'cpf', email: 'email', phone: 'telefone', city: 'cidade', consents: 'aceites' };
 
 function showFieldError(name, msg) {
   const input = form.elements[name];
@@ -330,9 +347,9 @@ FIELD_NAMES.forEach((name) => {
   input.addEventListener('blur', () => { if (input.value) showFieldError(name, validateField(name, input.value, CONFIG.limits)); });
   input.addEventListener('input', () => { if (input.getAttribute('aria-invalid') === 'true') showFieldError(name, validateField(name, input.value, CONFIG.limits)); });
 });
-['aceiteRegulamento', 'aceitePrivacidade'].forEach((n) => form.elements[n].addEventListener('change', () => {
-  if (form.elements.aceiteRegulamento.checked && form.elements.aceitePrivacidade.checked) showFieldError('aceites', '');
-}));
+const REQUIRED_CHECKS = ['maiorIdade', 'aceiteRegulamento', 'aceitePrivacidade'];
+const checksOk = () => REQUIRED_CHECKS.every((n) => form.elements[n].checked);
+REQUIRED_CHECKS.forEach((n) => form.elements[n].addEventListener('change', () => { if (checksOk()) showFieldError('aceites', ''); }));
 
 function utm() {
   const out = {};
@@ -349,9 +366,11 @@ form.addEventListener('submit', async (e) => {
     showFieldError(name, msg);
     if (msg && !firstInvalid) firstInvalid = form.elements[name];
   });
-  if (!form.elements.aceiteRegulamento.checked || !form.elements.aceitePrivacidade.checked) {
-    showFieldError('aceites', 'Aceite o regulamento e a Política de Privacidade pra participar.');
-    if (!firstInvalid) firstInvalid = form.elements.aceiteRegulamento;
+  if (!checksOk()) {
+    showFieldError('aceites', !form.elements.maiorIdade.checked
+      ? 'Confirme que tem 18 anos ou mais e aceite o regulamento e a Política de Privacidade pra participar.'
+      : 'Aceite o regulamento e a Política de Privacidade pra participar.');
+    if (!firstInvalid) firstInvalid = form.elements[REQUIRED_CHECKS.find((n) => !form.elements[n].checked)];
   }
   if (firstInvalid) { firstInvalid.focus(); return; }
 
@@ -365,6 +384,7 @@ form.addEventListener('submit', async (e) => {
     email: form.elements.email.value.trim().toLowerCase(),
     phone: onlyDigits(form.elements.telefone.value),
     city: form.elements.cidade.value.trim(),
+    ageConfirmed: { accepted: true, at: now },
     consents: {
       rules: { accepted: true, at: now },
       privacy: { accepted: true, at: now },
@@ -407,7 +427,7 @@ form.addEventListener('submit', async (e) => {
 /* ============================================================
    Confirmação
    ============================================================ */
-function enterConfirm() { setText('resultChip', `Resultado em ${D.result}`); }
+function enterConfirm() { setText('resultChip', `Resultado dia ${D.result} às ${D.resultHour}`); }
 
 /* ============================================================
    Quiz
@@ -421,7 +441,6 @@ function quizBack() {
 }
 
 async function enterQuiz() {
-  $('#quizKicker').textContent = isPromo() ? 'Enquanto o resultado não é revelado' : 'Monte sua rádio';
   const box = $('#quizState');
   if (!quiz) {
     box.innerHTML = '<div class="stack gap-10"><div class="skeleton"></div><div class="skeleton"></div></div>';
@@ -498,7 +517,7 @@ async function enterCustomize() {
   if (coverName) coverName.textContent = cover.name;
   const coverWhy = $('#coverWhy');
   if (coverWhy) coverWhy.textContent = `Definida pela sua resposta: “${option.label}”.`;
-  if (!state.radioName) set({ radioName: `Rádio ${cover.name}` });
+  if (!state.radioName) set({ radioName: cover.name });
   nameInput.value = state.radioName;
   checkName(false);
 }
@@ -550,7 +569,8 @@ function enterRadio() {
   const cover = $('#stationCover');
   cover.src = r.cover?.imageUrl || 'assets/img/kv-gta-vi-the-album.jpg';
   cover.alt = `Capa da rádio ${r.name}`;
-  $('#stationName').textContent = r.name;
+  $('#stationName').textContent = fmName(r.name);
+  $('#radioTitleName').textContent = fmName(r.name);
   $('#stationLink').textContent = r.playlistUrl.replace(/^https?:\/\//, '');
   $('#playRadio').href = r.playlistUrl;
 
@@ -586,16 +606,17 @@ function enterRadio() {
 }
 $('#shareRadio').addEventListener('click', async () => {
   const r = state.radio;
-  const data = { title: r.name, text: `Escuta a minha rádio de GTA VI: The Album: ${r.name}`, url: r.shareUrl || r.playlistUrl };
+  const text = shareText(r);
+  // Tudo vai no campo text (sem url separada) para os apps não duplicarem o link
   if (navigator.share) {
-    try { await navigator.share(data); track('compartilhar_radio', { method: 'native' }); } catch (_) { /* cancelado */ }
+    try { await navigator.share({ title: fmName(r.name), text }); track('compartilhar_radio', { method: 'native' }); } catch (_) { /* cancelado */ }
     return;
   }
   try {
-    await navigator.clipboard.writeText(`${data.text} ${data.url}`);
-    toast('Link copiado. Agora é só colar e mandar!');
+    await navigator.clipboard.writeText(text);
+    toast('Texto copiado. Agora é só colar e mandar!');
     track('compartilhar_radio', { method: 'clipboard' });
-  } catch (_) { toast('Copie o link: ' + data.url); }
+  } catch (_) { toast('Não deu pra copiar. Tente pelo botão Escutar no Spotify.'); }
 });
 $('#newRadio')?.addEventListener('click', () => { resetRadio(); go('quiz'); });
 
@@ -626,6 +647,7 @@ function fillRules() {
   });
 }
 function fillLinks() {
+  setText('promoNumber', CONFIG.promoNumber ? `Número da promo: ${CONFIG.promoNumber}` : 'Número da promo');
   $$('[data-link]').forEach((a) => { a.href = CONFIG.links[a.dataset.link] || '#'; });
   $$('[data-feature]').forEach((el) => { el.hidden = !CONFIG.features[el.dataset.feature]; });
 }
@@ -678,7 +700,7 @@ async function mountQA() {
     if (['personalizar', 'radio'].includes(route) && !quizComplete()) {
       const a = {}; quiz.questions.forEach((q) => { a[q.id] = q.options[1].id; }); set({ quizAnswers: a, quizStep: quiz.questions.length - 1 });
     }
-    if (route === 'radio' && !state.radio) set({ radio: await api.createRadio({ participationId: 'p_qa', answers: state.quizAnswers, name: 'Rádio Vice Nights' }) });
+    if (route === 'radio' && !state.radio) set({ radio: await api.createRadio({ participationId: 'p_qa', answers: state.quizAnswers, name: 'Vice Nights' }) });
     if (route === 'quiz') set({ quizStep: 0 });
   };
   const wrap = document.createElement('div');

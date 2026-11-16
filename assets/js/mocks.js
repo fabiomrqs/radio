@@ -18,22 +18,22 @@ const TRACKS = [
   { id: 't06', title: 'Bright Lights, Big City', artist: 'Keith Richards' },
 ].map((t) => ({ ...t, coverUrl: null, spotifyEmbedUrl: null }));
 
-// Perguntas provisórias: serão construídas junto com a curadoria das playlists.
+// Perguntas (textos aprovados): serão construídas junto com a curadoria das playlists.
 const QUIZ = {
   questions: [
     {
       id: 'q1', text: 'Qual é o seu rolê em Leonida?', definesCover: true,
       options: [
         { id: 'q1a', label: 'Pôr do sol na praia', icon: '🌅', cover: { id: 'c-por-do-sol', name: 'Pôr do sol', imageUrl: KV } },
-        { id: 'q1b', label: 'Noite de neon em Vice City', icon: '🌃', cover: { id: 'c-neon', name: 'Noite de neon', imageUrl: KV } },
+        { id: 'q1b', label: 'Noite neon em Vice City', icon: '🌃', cover: { id: 'c-neon', name: 'Noite neon', imageUrl: KV } },
         { id: 'q1c', label: 'Fuga em alta velocidade', icon: '🏎️', cover: { id: 'c-velocidade', name: 'Alta velocidade', imageUrl: KV } },
         { id: 'q1d', label: 'Estrada sem destino', icon: '🛣️', cover: { id: 'c-estrada', name: 'Estrada sem destino', imageUrl: KV } },
       ],
     },
     {
-      id: 'q2', text: 'Quando a polícia aparece, você…',
+      id: 'q2', text: 'Quando a polícia aparece, você:',
       options: [
-        { id: 'q2a', label: 'Pisa fundo e some no retrovisor', icon: '💨' },
+        { id: 'q2a', label: 'Pisa fundo e some', icon: '💨' },
         { id: 'q2b', label: 'Planeja o golpe perfeito', icon: '🧠' },
         { id: 'q2c', label: 'Nem liga e curte a paisagem', icon: '😎' },
         { id: 'q2d', label: 'Chama o parceiro e parte pro caos', icon: '🔥' },

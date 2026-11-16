@@ -26,6 +26,8 @@ export const BLOCK_ANYWHERE = [
   'fuck', 'motherfucker', 'bitch', 'pussy', 'cunt', 'asshole', 'bastard', 'whore', 'slut',
   // Ódio, violência grave e crimes
   'nazista', 'hitler', 'estupro', 'estuprador', 'pedofilo', 'pedofilia', 'terrorista', 'suicidio',
+  // Outras gravadoras e distribuidoras
+  'altafonte',
 ];
 
 export const BLOCK_WHOLE = [
@@ -42,7 +44,15 @@ export const BLOCK_WHOLE = [
   'dick', 'cock', 'shit', 'porn', 'nude', 'nudes', 'sex', 'tits', 'boobs',
   // Ódio, violência grave e crimes
   'nazi', 'heil', 'kkk', '1488', 'rape', 'pedo',
+  // Outras gravadoras e distribuidoras
+  'sony', 'universal', 'believe',
 ];
+
+/**
+ * Expressões de mais de uma palavra. Batem com ou sem espaço/pontuação entre as palavras
+ * ("Som Livre", "somlivre", "One-RPM", "The.Orchard").
+ */
+export const BLOCK_PHRASES = ['som livre', 'one rpm', 'the orchard'];
 
 /**
  * Avaliar com a Warner antes de bloquear (palavras comuns com uso ofensivo ou político).
@@ -76,8 +86,13 @@ function wholeHit(x, b) {
 }
 
 /** Retorna true se o nome contém termo proibido. */
+const PHRASE_RES = BLOCK_PHRASES.map((p) => new RegExp(`(^| )${p.split(' ').join(' ?')}( |$)`));
+
 export function isBlocked(text) {
   const n = norm(text);
+  // Expressões: palavras inteiras, com ou sem separador entre elas
+  const spaced = ` ${unleet(n).replace(/[^a-z0-9]+/g, ' ').trim()} `;
+  if (PHRASE_RES.some((re) => re.test(spaced))) return true;
   // Termos separados por espaço; pontuação dentro do termo é ignorada ("f.u.c.k", "ai-5").
   const terms = n.split(/\s+/).filter(Boolean);
   // Também palavras quebradas por pontuação ("rádio_lula" → "radio", "lula").
