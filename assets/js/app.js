@@ -758,6 +758,7 @@ async function mountQA() {
   fillLinks();
   fillRules();
   await loadStatus();
+  api.registerVisit();
   if (state.quizStep == null) set({ quizStep: 0 });
   if (['personalizar'].includes(location.hash.slice(1))) { try { await ensureQuiz(); } catch (_) {} }
   render();

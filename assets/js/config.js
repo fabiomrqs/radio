@@ -3,11 +3,14 @@
  * Em produção, este arquivo pode ser gerado no deploy (ex.: a partir de variáveis de ambiente).
  */
 export const CONFIG = {
-  /** Base da API. Todas as rotas em api.js são relativas a ela. */
-  apiBase: '/api',
+  /**
+   * Endereço da API (servidor no Render). Troque pelo endereço do seu serviço, terminando em /api.
+   * Ex.: 'https://radio-gtavi-api.onrender.com/api'
+   */
+  apiBase: 'https://radio-z16y.onrender.com/api',
 
-  /** true = usa os dados simulados de mocks.js (sem backend). Em produção: false. */
-  useMocks: true,
+  /** true = usa os dados simulados de mocks.js (sem backend). Com o servidor no ar: false. */
+  useMocks: false,
 
   /**
    * Lista de faixas. Com uma URL, o site lê o JSON estático (funciona no GitHub Pages).
@@ -53,7 +56,7 @@ export const CONFIG = {
     linktree: 'https://lnk.to/GTAVI_TheAlbum', // botões “Salvar o álbum” e “Ouvir o álbum”
     privacy: 'https://privacy.wmg.com/wmi/privacy/por',
     /** Endereço da landing usado no texto de compartilhamento. Trocar pelo domínio final quando estiver configurado. */
-    landing: 'https://fabiomrqs.github.io/radio/#inicio',
+    landing: 'https://www.radiogtavithealbum.com/#inicio',
     /** URL do regulamento para embed via iframe. null = usa rulesHtml abaixo. */
     rulesEmbedUrl: null,
   },

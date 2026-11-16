@@ -55,6 +55,7 @@ const withSpotifyUrl = (a) => ({ ...a, spotifyUrl: a.spotifyUrl || (a.spotifyId 
 const error = (status, code, message, fields) => new ApiError(status, code, message, fields);
 
 export const api = {
+  registerVisit() {},
   async getStatus() {
     await wait(150);
     const phase = phaseByDate();

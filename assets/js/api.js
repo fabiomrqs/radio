@@ -70,6 +70,8 @@ const real = {
   getQuiz: () => request('GET', '/quiz'),
   createParticipation: (payload) => request('POST', '/participations', payload, { captchaAction: 'participation' }),
   createRadio: (payload) => request('POST', '/radios', payload, { captchaAction: 'radio' }),
+  /** Soma 1 no contador de visitas do painel (sem dados pessoais). Nunca quebra a página. */
+  registerVisit: () => fetch(CONFIG.apiBase + '/acesso', { method: 'POST', keepalive: true }).catch(() => {}),
 };
 
 export const api = CONFIG.useMocks ? mocks.api : real;
