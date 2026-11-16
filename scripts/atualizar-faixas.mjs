@@ -1,9 +1,10 @@
 #!/usr/bin/env node
 /**
- * Atualiza assets/data/tracks.json com título, artistas, capa e status de lançamento
- * de cada faixa, direto da API do Spotify.
+ * Atualiza, direto da API do Spotify:
+ *  - assets/data/tracks.json: título, artistas, capa e status de lançamento de cada faixa;
+ *  - assets/data/artists.json: nome e foto de perfil de cada artista.
  *
- * Rode sempre que uma faixa nova sair e faça commit do tracks.json:
+ * Rode sempre que uma faixa nova sair e faça commit dos dois JSON:
  *
  *   SPOTIFY_CLIENT_ID=xxx SPOTIFY_CLIENT_SECRET=yyy node scripts/atualizar-faixas.mjs
  *
@@ -22,6 +23,7 @@ import path from 'node:path';
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const FILE = path.join(ROOT, 'assets/data/tracks.json');
+const ARTISTS_FILE = path.join(ROOT, 'assets/data/artists.json');
 const MARKET = 'BR';
 
 const { SPOTIFY_CLIENT_ID: id, SPOTIFY_CLIENT_SECRET: secret } = process.env;
@@ -84,3 +86,25 @@ data.tracks = data.tracks.map((t) => {
 
 await writeFile(FILE, JSON.stringify(data, null, 2) + '\n');
 console.log(`\n${changed} faixa(s) atualizada(s). Lançadas: ${data.tracks.filter((t) => t.released).length}/${data.tracks.length}.`);
+
+// ---------- Artistas ----------
+const artistsData = JSON.parse(await readFile(ARTISTS_FILE, 'utf8'));
+const artistIds = artistsData.artists.map((a) => a.spotifyId).filter(Boolean);
+const artistMap = new Map();
+for (let i = 0; i < artistIds.length; i += 50) {
+  const chunk = artistIds.slice(i, i + 50);
+  const res = await get(`https://api.spotify.com/v1/artists?ids=${chunk.join(',')}`, auth);
+  res.artists.forEach((a, j) => artistMap.set(chunk[j], a));
+}
+artistsData.artists = artistsData.artists.map((a) => {
+  const s = artistMap.get(a.spotifyId);
+  if (!s) { console.warn(`! artista ${a.spotifyId} não encontrado no Spotify.`); return a; }
+  if (a.lock) return a;
+  // foto de perfil com pelo menos 300px (a lista mostra 92px; o destaque, 104px em telas de alta densidade)
+  const imgs = [...(s.images || [])].sort((x, y) => x.width - y.width);
+  const photo = (imgs.find((im) => im.width >= 300) || imgs[imgs.length - 1])?.url || null;
+  console.log(`${photo ? '✓' : '…'} ${s.name}`);
+  return { ...a, name: s.name, photoUrl: photo };
+});
+await writeFile(ARTISTS_FILE, JSON.stringify(artistsData, null, 2) + '\n');
+console.log(`Artistas com foto: ${artistsData.artists.filter((a) => a.photoUrl).length}/${artistsData.artists.length}.`);

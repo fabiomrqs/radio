@@ -51,6 +51,7 @@ function phaseByDate(now = new Date()) {
   return 'arquivo';
 }
 
+const withSpotifyUrl = (a) => ({ ...a, spotifyUrl: a.spotifyUrl || (a.spotifyId ? `https://open.spotify.com/artist/${a.spotifyId}` : null) });
 const error = (status, code, message, fields) => new ApiError(status, code, message, fields);
 
 export const api = {
@@ -82,14 +83,22 @@ export const api = {
     if (isBlocked(p.name)) throw error(422, 'validation_error', 'Nome não aceito.', { name: 'Nome não aceito. Tente outro.' });
     const opt = QUIZ.questions[0].options.find((o) => o.id === p.answers.q1) || QUIZ.questions[0].options[1];
     const id = 'r_' + Math.random().toString(36).slice(2, 10);
+    let artists = [];
+    try {
+      const { getStaticArtists } = await import('./api.js');
+      artists = (await getStaticArtists()).artists.map(withSpotifyUrl);
+      // destaque aleatório, para cada rádio ter uma cara
+      artists.unshift(...artists.splice(Math.floor(Math.random() * artists.length), 1));
+    } catch (_) { /* sem lista de artistas */ }
     return {
       radioId: id,
       name: p.name.trim(),
       cover: opt.cover,
       playlistUrl: 'https://open.spotify.com/playlist/[ID]',
       shareUrl: location.origin + location.pathname + '#inicio',
-      featuredArtist: { name: 'Travis Scott', photoUrl: null },
-      artists: TRACKS.map((t) => ({ name: t.artist.split(/,| feat\.| &/)[0].trim(), photoUrl: null })),
+      // O backend escolhe os artistas da playlist gerada; aqui usamos todos os do artists.json
+      featuredArtist: artists[0] || null,
+      artists,
     };
   },
 };

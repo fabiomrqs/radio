@@ -16,6 +16,9 @@ export const CONFIG = {
    */
   tracksUrl: 'assets/data/tracks.json',
 
+  /** Artistas do álbum (foto e nome), usados em “Quem toca na sua rádio”. */
+  artistsUrl: 'assets/data/artists.json',
+
   /** Timeout das chamadas à API, em ms. */
   requestTimeoutMs: 15000,
 

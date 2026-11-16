@@ -60,6 +60,17 @@ function shareText(r) {
     : `Gostou? Crie a sua também aqui! ${landing}`;
   return `Escute ${fmName(r.name)}, a minha rádio GTAVI: The Album ${r.playlistUrl}\n\n${invite}`;
 }
+/** Nome e foto de um artista pelo oEmbed público do Spotify (quando o artists.json ainda não tem). */
+async function artistFromSpotify(a) {
+  try {
+    const res = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(a.spotifyUrl)}`);
+    if (!res.ok) return false;
+    const o = await res.json();
+    if (!a.name && o.title) a.name = o.title;
+    if (!a.photoUrl && o.thumbnail_url) a.photoUrl = o.thumbnail_url;
+    return true;
+  } catch (_) { return false; }
+}
 const firstName = (artist) => artist.split(/,| feat\.| ft\.| & | x /i)[0].trim();
 
 /* ============================================================
@@ -576,23 +587,42 @@ function enterRadio() {
 
   const artist = $('#stationArtist');
   artist.innerHTML = '';
-  if (r.featuredArtist?.photoUrl) {
-    const img = new Image(); img.src = r.featuredArtist.photoUrl; img.alt = r.featuredArtist.name;
-    artist.appendChild(img);
-  } else artist.textContent = `[FOTO DO ARTISTA${r.featuredArtist ? ': ' + r.featuredArtist.name : ''}]`;
+  const fa = r.featuredArtist;
+  const paintFeatured = () => {
+    artist.innerHTML = '';
+    if (fa?.photoUrl) {
+      const img = new Image(); img.src = fa.photoUrl; img.alt = fa.name || 'Artista em destaque';
+      artist.appendChild(img);
+    } else artist.textContent = '';
+    artist.hidden = !fa?.photoUrl;
+  };
+  paintFeatured();
 
   const lineup = $('#lineup');
   lineup.innerHTML = '';
   (r.artists || []).forEach((a) => {
     const li = document.createElement('li');
-    li.innerHTML = '<div class="avatar"></div><span></span>';
-    const av = $('.avatar', li);
-    if (a.photoUrl) {
-      av.classList.add('has-img');
-      const img = new Image(); img.src = a.photoUrl; img.alt = ''; img.loading = 'lazy'; av.appendChild(img);
-    } else av.textContent = '[FOTO]';
-    $('span', li).textContent = firstName(a.name);
+    // Cada artista leva ao perfil dele no Spotify (atribuição exigida para usar as fotos)
+    li.innerHTML = a.spotifyUrl
+      ? '<a class="lineup-link" target="_blank" rel="noopener"><div class="avatar"></div><span></span></a>'
+      : '<div class="avatar"></div><span></span>';
+    const link = $('a', li);
+    if (link) link.href = a.spotifyUrl;
+    const paint = () => {
+      const av = $('.avatar', li);
+      av.innerHTML = '';
+      av.classList.toggle('has-img', !!a.photoUrl);
+      if (a.photoUrl) {
+        const img = new Image(); img.src = a.photoUrl; img.alt = ''; img.loading = 'lazy'; av.appendChild(img);
+      }
+      $('span', li).textContent = a.name ? firstName(a.name) : '';
+      if (link) link.setAttribute('aria-label', a.name ? `${a.name} no Spotify` : 'Artista no Spotify');
+    };
+    paint();
     lineup.appendChild(li);
+    if ((!a.photoUrl || !a.name) && a.spotifyUrl) {
+      artistFromSpotify(a).then((ok) => { if (ok) { paint(); if (a === fa) paintFeatured(); } });
+    }
   });
   $('#lineupBlock').hidden = !(r.artists || []).length;
 

@@ -1,0 +1,90 @@
+{
+  "_comentario": "Artistas exibidos em 'Quem toca na sua rádio'. name/photoUrl vazios são preenchidos por scripts/atualizar-faixas.mjs ou, no navegador, pelo oEmbed do Spotify.",
+  "artists": [
+    {
+      "spotifyId": "67lytN32YpUxiSeWlKfHJ3",
+      "name": "",
+      "photoUrl": null
+    },
+    {
+      "spotifyId": "0ys2OFYzWYB5hRDLCsBqxt",
+      "name": "",
+      "photoUrl": null
+    },
+    {
+      "spotifyId": "1gR0gsQYfi6joyO1dlp76N",
+      "name": "",
+      "photoUrl": null
+    },
+    {
+      "spotifyId": "5INjqkS1o8h1imAzPqGZBb",
+      "name": "",
+      "photoUrl": null
+    },
+    {
+      "spotifyId": "7tYKF4w9nC0nq9CsPZTHyP",
+      "name": "",
+      "photoUrl": null
+    },
+    {
+      "spotifyId": "4oUHIQIBe0LHzYfvXNW4QM",
+      "name": "",
+      "photoUrl": null
+    },
+    {
+      "spotifyId": "6I8TDGeUmmLom8auKPzMdX",
+      "name": "",
+      "photoUrl": null
+    },
+    {
+      "spotifyId": "78rUTD7y6Cy67W1RVzYs7t",
+      "name": "",
+      "photoUrl": null
+    },
+    {
+      "spotifyId": "0Y5tJX1MQlPlqiwlOH1tJY",
+      "name": "",
+      "photoUrl": null
+    },
+    {
+      "spotifyId": "0iEtIxbK0KxaSlF7G42ZOp",
+      "name": "",
+      "photoUrl": null
+    },
+    {
+      "spotifyId": "1RyvyyTE3xzB2ZywiAwp0i",
+      "name": "",
+      "photoUrl": null
+    },
+    {
+      "spotifyId": "4oLeXFyACqeem2VImYeBFe",
+      "name": "",
+      "photoUrl": null
+    },
+    {
+      "spotifyId": "6XYvaoDGE0VmRt83Jss9Sn",
+      "name": "",
+      "photoUrl": null
+    },
+    {
+      "spotifyId": "1mcTU81TzQhprhouKaTkpq",
+      "name": "",
+      "photoUrl": null
+    },
+    {
+      "spotifyId": "4kYSro6naA4h99UJvo89HB",
+      "name": "",
+      "photoUrl": null
+    },
+    {
+      "spotifyId": "4NHQUGzhtTLFvgF5SZesLK",
+      "name": "",
+      "photoUrl": null
+    },
+    {
+      "spotifyId": "08avsqaGIlK2x3i2Cu7rKH",
+      "name": "",
+      "photoUrl": null
+    }
+  ]
+}
