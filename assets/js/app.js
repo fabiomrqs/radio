@@ -9,6 +9,7 @@ import { masks, validateField, parseBirthDate, onlyDigits } from './validation.j
 import { isBlocked } from './profanity.js';
 import { track } from './analytics.js';
 import { mountSpotifyEmbed, pauseAllEmbeds } from './embeds.js';
+import { gerarImagemStory } from './share-image.js';
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -55,12 +56,14 @@ function friendlyError(err) {
 /** "Noite neon" → "Noite neon FM" (sem duplicar se a pessoa já escreveu FM). */
 const fmName = (name) => (/\bfm$/i.test(String(name).trim()) ? String(name).trim() : `${String(name).trim()} FM`);
 /** Texto de compartilhamento da rádio. Durante a promoção convida a concorrer ao prêmio. */
+const SITE_TEXTO = 'www.radiogtavithealbum.com';
+/** Convite do fim do texto. Depois do fim das participações, sem a parte do prêmio. */
+const convite = () => (isPromo()
+  ? 'Gostou? Crie a sua também e ainda concorra a um PS5 + GTAVI aqui!'
+  : 'Gostou? Crie a sua também aqui!');
+/** Texto completo, com o link da playlist logo no começo (o WhatsApp monta o card a partir do primeiro link). */
 function shareText(r) {
-  const landing = CONFIG.links.landing || location.href.split('#')[0];
-  const invite = isPromo()
-    ? `Gostou? Crie a sua também e ainda concorra a um PS5 + GTAVI aqui! ${landing}`
-    : `Gostou? Crie a sua também aqui! ${landing}`;
-  return `Escute ${fmName(r.name)}, a minha rádio GTAVI: The Album ${r.playlistUrl}\n\n${invite}`;
+  return `Escute ${fmName(r.name)}, a minha rádio GTAVI: The Album ${r.playlistUrl}\n\n${convite()} ${SITE_TEXTO}`;
 }
 /** Nome e foto de um artista pelo oEmbed público do Spotify (quando o artists.json ainda não tem). */
 async function artistFromSpotify(a) {
@@ -572,12 +575,15 @@ function enterRadio() {
   const r = state.radio;
   if (!r) return;
   const cover = $('#stationCover');
-  cover.src = r.cover?.imageUrl || 'assets/img/kv-gta-vi-the-album.jpg';
+  cover.src = capaLocal(r);
   cover.alt = `Capa da rádio ${r.name}`;
   $('#stationName').textContent = fmName(r.name);
   $('#radioTitleName').textContent = fmName(r.name);
   $('#stationLink').textContent = r.playlistUrl.replace(/^https?:\/\//, '');
   $('#playRadio').href = r.playlistUrl;
+  // Se o Spotify não criou a playlist, o botão leva ao álbum: o texto diz isso
+  $('#playRadioLabel').textContent = r.playlistCreated === false ? 'Ouvir o álbum no Spotify' : 'Escutar no Spotify';
+  storyBlob = null;
 
   const artist = $('#stationArtist');
   artist.innerHTML = '';
@@ -628,20 +634,69 @@ function enterRadio() {
   const card = $('#stationCard');
   card.classList.remove('reveal'); void card.offsetWidth; card.classList.add('reveal');
 }
-$('#shareRadio').addEventListener('click', async () => {
+/* ---------- Compartilhar: Instagram, WhatsApp, X e Baixar ---------- */
+/** Capa servida pelo próprio site (necessário para desenhar a imagem de compartilhamento). */
+function capaLocal(r) {
+  const id = r.cover?.id;
+  return /^capa-\d+$/.test(id || '') ? `assets/img/capas/${id}.jpg` : (r.cover?.imageUrl || 'assets/img/capas/capa-2.jpg');
+}
+let storyBlob = null;
+async function imagemStory() {
+  if (storyBlob) return storyBlob;
   const r = state.radio;
-  const text = shareText(r);
-  // Tudo vai no campo text (sem url separada) para os apps não duplicarem o link
-  if (navigator.share) {
-    try { await navigator.share({ title: fmName(r.name), text }); track('compartilhar_radio', { method: 'native' }); } catch (_) { /* cancelado */ }
-    return;
-  }
+  storyBlob = await gerarImagemStory({
+    nomeFM: fmName(r.name), capaSrc: capaLocal(r), playlistUrl: r.playlistUrl, siteUrl: SITE_TEXTO, convite: convite(),
+  });
+  return storyBlob;
+}
+const nomeArquivo = () => `minha-radio-${String(state.radio.name).toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'gtavi'}.jpg`;
+function baixar(blob) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = nomeArquivo();
+  document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(url), 10000);
+}
+
+const COMPARTILHAR = {
+  async instagram(btn) {
+    const blob = await comCarregando(btn, imagemStory);
+    const arquivo = new File([blob], nomeArquivo(), { type: 'image/jpeg' });
+    // No celular abre a folha de compartilhar com a imagem (escolha Instagram → Stories)
+    if (navigator.canShare?.({ files: [arquivo] })) {
+      try { await navigator.share({ files: [arquivo] }); } catch (_) { /* cancelado */ }
+      return;
+    }
+    baixar(blob);
+    toast('Imagem baixada! Publique nos Stories do Instagram.');
+  },
+  whatsapp() {
+    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText(state.radio))}`, '_blank', 'noopener');
+  },
+  x() {
+    // O link da playlist vai no fim (parâmetro url) para o X montar o card da playlist
+    const r = state.radio;
+    const texto = `Escute ${fmName(r.name)}, a minha rádio GTAVI: The Album\n\n${convite()} ${SITE_TEXTO}`;
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(texto)}&url=${encodeURIComponent(r.playlistUrl)}`, '_blank', 'noopener');
+  },
+  async baixar(btn) {
+    baixar(await comCarregando(btn, imagemStory));
+  },
+};
+async function comCarregando(btn, fn) {
+  btn.classList.add('is-loading');
+  try { return await fn(); } finally { btn.classList.remove('is-loading'); }
+}
+$$('[data-share]').forEach((btn) => btn.addEventListener('click', async () => {
+  const canal = btn.dataset.share;
   try {
-    await navigator.clipboard.writeText(text);
-    toast('Texto copiado. Agora é só colar e mandar!');
-    track('compartilhar_radio', { method: 'clipboard' });
-  } catch (_) { toast('Não deu pra copiar. Tente pelo botão Escutar no Spotify.'); }
-});
+    await COMPARTILHAR[canal](btn);
+    track('compartilhar_radio', { method: canal });
+  } catch (e) {
+    console.error(e);
+    toast('Não foi possível gerar a imagem agora. Tente de novo.');
+  }
+}));
 $('#newRadio')?.addEventListener('click', () => { resetRadio(); go('quiz'); });
 
 const SCREEN_ENTER = {
