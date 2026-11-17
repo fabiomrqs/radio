@@ -22,8 +22,8 @@ export const CONFIG = {
   /** Artistas do álbum (foto e nome), usados em “Quem toca na sua rádio”. */
   artistsUrl: 'assets/data/artists.json',
 
-  /** Timeout das chamadas à API, em ms. */
-  requestTimeoutMs: 15000,
+  /** Tempo máximo de espera da API, em ms. Alto para cobrir o servidor “acordando” no Render. */
+  requestTimeoutMs: 60000,
 
   /**
    * Datas da promoção (horário de Brasília). Usadas no texto da página e como fallback de fase

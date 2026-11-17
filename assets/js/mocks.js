@@ -82,7 +82,11 @@ export const api = {
   async createRadio(p) {
     await wait(1400);
     if (isBlocked(p.name)) throw error(422, 'validation_error', 'Nome não aceito.', { name: 'Nome não aceito. Tente outro.' });
+    // Mesma regra do servidor: a pergunta 1 define a capa (sorteada entre as opções)
+    const CAPAS = { q1a: ['capa-2', 'capa-4'], q1b: ['capa-3', 'capa-5'], q1c: ['capa-6'], q1d: ['capa-1'] };
     const opt = QUIZ.questions[0].options.find((o) => o.id === p.answers.q1) || QUIZ.questions[0].options[1];
+    const opcoes = CAPAS[opt.id] || ['capa-1'];
+    const capa = opcoes[Math.floor(Math.random() * opcoes.length)];
     const id = 'r_' + Math.random().toString(36).slice(2, 10);
     let artists = [];
     try {
@@ -94,8 +98,9 @@ export const api = {
     return {
       radioId: id,
       name: p.name.trim(),
-      cover: opt.cover,
-      playlistUrl: 'https://open.spotify.com/playlist/[ID]',
+      cover: { id: capa, name: opt.cover.name, imageUrl: `assets/img/capas/${capa}.jpg` },
+      playlistUrl: 'https://open.spotify.com/album/5BYKG4MHfySZthe2W6r7n4',
+      playlistCreated: false,
       shareUrl: location.origin + location.pathname + '#inicio',
       // O backend escolhe os artistas da playlist gerada; aqui usamos todos os do artists.json
       featuredArtist: artists[0] || null,

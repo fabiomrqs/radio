@@ -8,6 +8,7 @@ import { state, set, resetRadio } from './store.js';
 import { masks, validateField, parseBirthDate, onlyDigits } from './validation.js';
 import { isBlocked } from './profanity.js';
 import { track } from './analytics.js';
+import { mountSpotifyEmbed, pauseAllEmbeds } from './embeds.js';
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -45,6 +46,7 @@ function toast(msg) {
 }
 function friendlyError(err) {
   if (!(err instanceof ApiError)) return 'Algo deu errado. Tente de novo.';
+  if (err.code === 'timeout') return 'O servidor demorou para responder. Tente de novo em alguns segundos.';
   if (err.status === 0) return 'Não conseguimos conectar. Confira sua internet e tente de novo.';
   if (err.status === 429) return 'Muitas tentativas seguidas. Espere um minuto e tente de novo.';
   if (err.code === 'promo_closed') return 'As participações estão encerradas.';
@@ -141,6 +143,7 @@ function render() {
   document.title = route.title === ROUTES.inicio.title ? route.title : `${route.title} | Rádio GTAVI: The Album`;
   $('#headerBack').hidden = !route.back;
 
+  if (current !== name) pauseAllEmbeds(); // a música não continua tocando numa tela escondida
   const enter = SCREEN_ENTER[screenId];
   if (enter) enter();
 
@@ -241,14 +244,6 @@ function labelTrack(t, li) {
   const f = $('iframe', li);
   if (f) f.title = `Player do Spotify: ${name}`;
 }
-function spotifyIframe(t) {
-  const f = document.createElement('iframe');
-  f.src = t.spotifyEmbedUrl;
-  f.loading = 'lazy';
-  f.width = '100%'; f.height = '80';
-  f.allow = 'autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture';
-  return f;
-}
 
 function renderTracks() {
   const list = $('#trackList');
@@ -271,8 +266,8 @@ function renderTracks() {
     input.addEventListener('change', () => pickTrack(t.id));
 
     const slot = $('.track-player', li);
-    if (t.released && t.spotifyEmbedUrl) {
-      slot.appendChild(spotifyIframe(t));
+    if (t.released && t.spotifyId) {
+      mountSpotifyEmbed(slot, { spotifyId: t.spotifyId, embedUrl: t.spotifyEmbedUrl, title: `Player do Spotify: ${trackLabel(t)}`, lazy: true });
     } else {
       // Ainda não lançada: sem player
       slot.innerHTML = '<div class="soon-row"><span class="soon-name"></span><span class="soon-badge">Em breve</span></div>';
@@ -307,10 +302,8 @@ async function enterAnswer() {
   if (slot && slot.dataset.trackId !== t.id) {
     slot.dataset.trackId = t.id || '';
     slot.innerHTML = '';
-    if (t.spotifyEmbedUrl) {
-      const f = spotifyIframe(t); f.loading = 'eager';
-      f.title = `Player do Spotify: ${trackLabel(t)}`;
-      slot.appendChild(f);
+    if (t.spotifyId) {
+      mountSpotifyEmbed(slot, { spotifyId: t.spotifyId, embedUrl: t.spotifyEmbedUrl, title: `Player do Spotify: ${trackLabel(t)}` });
     } else if (t.n) slot.textContent = trackLabel(t);
   }
   if (answer.value !== state.answer) answer.value = state.answer;
@@ -553,6 +546,7 @@ $('#toRadio').addEventListener('click', async () => {
   try {
     const radio = await api.createRadio({
       participationId: state.participationId, // null fora da promoção
+      trackId: state.trackId, // define o gênero da rádio quando não há inscrição
       answers: state.quizAnswers,
       name: nameInput.value.trim(),
     });

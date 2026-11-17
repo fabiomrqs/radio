@@ -19,9 +19,9 @@ async function captchaToken(action) {
   return null;
 }
 
-async function request(method, path, body, { captchaAction } = {}) {
+async function request(method, path, body, { captchaAction, timeoutMs = CONFIG.requestTimeoutMs } = {}) {
   const ctrl = new AbortController();
-  const timer = setTimeout(() => ctrl.abort(), CONFIG.requestTimeoutMs);
+  const timer = setTimeout(() => ctrl.abort(), timeoutMs);
   const headers = { Accept: 'application/json' };
   if (body) headers['Content-Type'] = 'application/json';
   if (captchaAction) {
@@ -65,7 +65,8 @@ export const getStaticTracks = () => getStaticJson(CONFIG.tracksUrl);
 export const getStaticArtists = () => getStaticJson(CONFIG.artistsUrl);
 
 const real = {
-  getStatus: () => request('GET', '/status'),
+  // Curto de propósito: a página não espera o servidor acordar para abrir (usa as datas do config.js)
+  getStatus: () => request('GET', '/status', null, { timeoutMs: 8000 }),
   getTracks: () => (CONFIG.tracksUrl ? getStaticTracks() : request('GET', '/tracks')),
   getQuiz: () => request('GET', '/quiz'),
   createParticipation: (payload) => request('POST', '/participations', payload, { captchaAction: 'participation' }),

@@ -1,14 +1,14 @@
 /**
- * Filtro de palavras proibidas no nome da rádio.
- * Lista: "Minha Rádio GTA VI: The Album – versão inicial para aprovação da Warner – 03/11/2026".
+ * Filtro de palavras proibidas no nome da rádio (lista aprovada com a Warner).
  *
- * IMPORTANTE: este filtro é só para feedback imediato. O backend DEVE aplicar a mesma regra
- * em POST /radios (o front pode ser burlado). Sugestão: servir estas listas por API ou
- * compartilhar este arquivo com o backend (é JS puro, sem dependências de DOM).
+ * IMPORTANTE: este filtro dá o retorno imediato no site, mas o servidor aplica a mesma regra
+ * em POST /api/radios (o site pode ser burlado). O mesmo arquivo é usado nos dois lados.
  *
  * Duas regras:
  *  - BLOCK_ANYWHERE: bloqueia também dentro de outras palavras ("bolsonarista" pega "Rádio Bolsonaristas").
  *  - BLOCK_WHOLE: bloqueia só como palavra inteira. Sem isso, "cu" bloquearia "música" e "pt" bloquearia "captain".
+ * Expressões com espaço também são pegas: "som livre", "filho da puta" e "boca de fumo" batem com
+ * "somlivre", "filhodaputa" e "bocadefumo".
  * Escreva tudo em minúsculas e sem acento.
  */
 export const BLOCK_ANYWHERE = [
@@ -26,8 +26,17 @@ export const BLOCK_ANYWHERE = [
   'fuck', 'motherfucker', 'bitch', 'pussy', 'cunt', 'asshole', 'bastard', 'whore', 'slut',
   // Ódio, violência grave e crimes
   'nazista', 'hitler', 'estupro', 'estuprador', 'pedofilo', 'pedofilia', 'terrorista', 'suicidio',
-  // Outras gravadoras e distribuidoras
-  'altafonte',
+  // Gravadoras concorrentes
+  'sonymusic', 'universalmusic', 'somlivre', 'onerpm', 'theorchard', 'altafonte',
+  // Drogas
+  'maconha', 'maconheiro', 'marijuana', 'cannabis', 'cocaina', 'cocaine', 'heroina', 'heroin', 'metanfetamina', 'haxixe',
+  'ecstasy', 'lancaperfume', 'ketamina', 'fentanil', 'fentanyl', 'codeina', 'traficante', 'trafico', 'bocadefumo', 'drogado',
+  // Violência
+  'assassino', 'assassinato', 'homicidio', 'chacina', 'massacre', 'tiroteio', 'metralhadora', 'esfaquear', 'facada',
+  'sequestro', 'tortura', 'espancar', 'genocidio', 'explodir', 'murder', 'killer', 'shooting',
+  // Doenças
+  'cancer', 'aidetico', 'coronavirus', 'tuberculose', 'hepatite', 'sifilis', 'gonorreia', 'hanseniase', 'esquizofrenia',
+  'autismo', 'autista', 'diabetes', 'sarampo', 'malaria', 'variola', 'monkeypox',
 ];
 
 export const BLOCK_WHOLE = [
@@ -44,23 +53,18 @@ export const BLOCK_WHOLE = [
   'dick', 'cock', 'shit', 'porn', 'nude', 'nudes', 'sex', 'tits', 'boobs',
   // Ódio, violência grave e crimes
   'nazi', 'heil', 'kkk', '1488', 'rape', 'pedo',
-  // Outras gravadoras e distribuidoras
-  'sony', 'universal', 'believe',
+  // Gravadoras concorrentes
+  'sony', 'universal', 'umg', 'believe', 'orchard',
+  // Drogas
+  'beck', 'baseado', 'crack', 'oxi', 'lsd', 'mdma', 'md', 'keta', 'meth', 'opio', 'skunk', 'weed', 'lolo', 'noia',
+  'chapado', 'droga', 'drogas',
+  // Violência
+  'matar', 'mata', 'morte', 'morra', 'arma', 'armas', 'pistola', 'fuzil', 'glock', 'ak47', 'sangue', 'kill', 'gun', 'blood',
+  // Doenças
+  'aids', 'hiv', 'covid', 'dengue', 'zika', 'herpes', 'lepra', 'ebola', 'mpox',
 ];
 
-/**
- * Expressões de mais de uma palavra. Batem com ou sem espaço/pontuação entre as palavras
- * ("Som Livre", "somlivre", "One-RPM", "The.Orchard").
- */
-export const BLOCK_PHRASES = ['som livre', 'one rpm', 'the orchard'];
-
-/**
- * Avaliar com a Warner antes de bloquear (palavras comuns com uso ofensivo ou político).
- * NÃO são bloqueadas. Se aprovadas, mova para BLOCK_WHOLE.
- */
-export const PENDING_REVIEW = ['veado', 'macaco', 'coxinha', 'mortadela', 'alfa', 'beta', 'sigma', 'gozar', 'tesao', 'safado', 'cocaina', 'maconha', 'crack'];
-
-/** Nunca bloquear: "golpe" é resposta do quiz ("Planejar o golpe perfeito"). */
+/** Nunca bloquear: "golpe" é resposta do quiz ("Planeja o golpe perfeito"). */
 export const ALLOW = ['golpe'];
 
 /* ---------- Normalização ---------- */
@@ -84,22 +88,35 @@ function wholeHit(x, b) {
   // "kkkkk" ainda bate com "kkk": mesma forma reduzida e pelo menos o mesmo tamanho
   return hasDouble(b) && squeeze(x, 1) === squeeze(b, 1) && x.length >= b.length;
 }
-
-/** Retorna true se o nome contém termo proibido. */
-const PHRASE_RES = BLOCK_PHRASES.map((p) => new RegExp(`(^| )${p.split(' ').join(' ?')}( |$)`));
-
-export function isBlocked(text) {
-  const n = norm(text);
-  // Expressões: palavras inteiras, com ou sem separador entre elas
-  const spaced = ` ${unleet(n).replace(/[^a-z0-9]+/g, ' ').trim()} `;
-  if (PHRASE_RES.some((re) => re.test(spaced))) return true;
-  // Termos separados por espaço; pontuação dentro do termo é ignorada ("f.u.c.k", "ai-5").
-  const terms = n.split(/\s+/).filter(Boolean);
-  // Também palavras quebradas por pontuação ("rádio_lula" → "radio", "lula").
-  n.split(/[^a-z0-9@$!]+/).forEach((t) => { if (t && !terms.includes(t)) terms.push(t); });
-  return terms.some((t) => variants(t).some((x) => {
+function termBlocked(t) {
+  return variants(t).some((x) => {
     if (ALLOW.includes(x)) return false;
     if (BLOCK_WHOLE.some((b) => wholeHit(x, b))) return true;
     return BLOCK_ANYWHERE.some((b) => x.includes(b) || formFor(b, x).includes(b));
-  }));
+  });
+}
+const ALL = [...BLOCK_ANYWHERE, ...BLOCK_WHOLE];
+
+/** Retorna true se o nome contém termo proibido. */
+export function isBlocked(text) {
+  const n = norm(text);
+  // Termos separados por espaço; pontuação dentro do termo é ignorada ("f.u.c.k", "ai-5").
+  const terms = n.split(/\s+/).filter(Boolean);
+  // Também palavras quebradas por pontuação ("rádio_lula" → "radio", "lula").
+  const pieces = n.split(/[^a-z0-9@$!]+/).filter(Boolean);
+  pieces.forEach((t) => { if (!terms.includes(t)) terms.push(t); });
+  if (terms.some(termBlocked)) return true;
+  // Expressões separadas por espaço: 2 a 4 palavras seguidas que, juntas, formam um termo da lista
+  // ("som livre" → "somlivre"). Só palavras inteiras: "class hole" não vira "asshole".
+  for (const conv of [(p) => p, unleet]) {
+    const words = pieces.map((p) => conv(p).replace(/[^a-z0-9]/g, '')).filter(Boolean);
+    for (let i = 0; i < words.length; i++) {
+      let joined = words[i];
+      for (let k = i + 1; k < Math.min(words.length, i + 4); k++) {
+        joined += words[k];
+        if (ALL.some((w) => joined === w || formFor(w, joined) === w)) return true;
+      }
+    }
+  }
+  return false;
 }
