@@ -88,13 +88,9 @@ export const api = {
     const opcoes = CAPAS[opt.id] || ['capa-1'];
     const capa = opcoes[Math.floor(Math.random() * opcoes.length)];
     const id = 'r_' + Math.random().toString(36).slice(2, 10);
-    let artists = [];
-    try {
-      const { getStaticArtists } = await import('./api.js');
-      artists = (await getStaticArtists()).artists.map(withSpotifyUrl);
-      // destaque aleatório, para cada rádio ter uma cara
-      artists.unshift(...artists.splice(Math.floor(Math.random() * artists.length), 1));
-    } catch (_) { /* sem lista de artistas */ }
+    // Nomes como o Spotify devolve; o site só mostra os que têm foto aprovada
+    const artists = ['Travis Scott', 'Morgan Wallen', 'Dua Lipa', 'Future', 'Metro Boomin', 'JENNIE', 'Rauw Alejandro', 'Playboi Carti']
+      .map((name) => ({ name, photoUrl: null, spotifyUrl: 'https://open.spotify.com/' }));
     return {
       radioId: id,
       name: p.name.trim(),

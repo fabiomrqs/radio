@@ -235,17 +235,12 @@ strong.album { font-weight: 800; }
   font-size: 14px; line-height: 1.65; color: var(--text-2);
 }
 .rules-embed h3 { font-size: 15px; margin: 0 0 8px; color: var(--text); }
-.rules-embed .reg-titulo { text-align: center; line-height: 1.5; margin-bottom: 14px; }
-.rules-embed h4 { font-size: 14px; margin: 16px 0 6px; color: var(--cream); }
-.rules-embed h5 { font-size: 13px; margin: 12px 0 6px; color: var(--text); }
-.rules-embed p { margin: 0 0 10px; }
-.rules-embed a { word-break: break-all; }
-.rules-embed .reg-romanos { margin: 0 0 10px; padding-left: 26px; list-style: lower-roman; }
-.rules-embed .reg-romanos li { margin-bottom: 6px; }
-.reg-tabela { overflow-x: auto; margin: 0 0 12px; }
-.reg-tabela table { border-collapse: collapse; width: 100%; min-width: 460px; font-size: 13px; }
-.reg-tabela th, .reg-tabela td { border: 1px solid var(--line); padding: 6px 8px; text-align: left; vertical-align: top; }
-.reg-tabela th { background: var(--bg-deep); }
+.rules-pdf { height: 440px; padding: 12px; background: #5d5470; display: flex; flex-direction: column; align-items: center; gap: 12px; }
+.rules-pdf canvas { display: block; max-width: 100%; height: auto; background: #fff; border-radius: 4px; box-shadow: 0 4px 16px rgba(0, 0, 0, .35); flex-shrink: 0; }
+.rules-pdf.is-native { padding: 0; display: block; background: #fff; }
+.rules-pdf .pdf-carregando { margin: auto; color: var(--text-2); font-size: 14px; }
+@media (min-width: 960px) { .rules-pdf { height: 560px; } }
+.modal-sheet .rules-pdf { height: auto; flex: 1; min-height: 320px; }
 .rules-embed iframe { width: 100%; height: 100%; border: 0; background: #fff; border-radius: var(--radius-s); }
 
 /* ---------- Faixas ---------- */
@@ -282,6 +277,14 @@ strong.album { font-weight: 800; }
   color: var(--text); font-size: 16px; font-weight: 500;
 }
 .input { height: 52px; padding: 0 14px; }
+/* Select no mesmo visual dos campos: sem a aparência nativa, seta própria e texto cinza enquanto vazio */
+select.input {
+  -webkit-appearance: none; appearance: none; cursor: pointer; padding-right: 44px; line-height: 50px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='9' viewBox='0 0 14 9'%3E%3Cpath d='M1 1l6 6 6-6' fill='none' stroke='%23F7D4BE' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 16px center; background-size: 14px 9px;
+}
+select.input:invalid, select.input.is-empty { color: #9A8FB0; }
+select.input option { color: var(--text); background: var(--bg-deep); }
 .textarea { min-height: 200px; padding: 14px; resize: vertical; line-height: 1.55; }
 .input::placeholder, .textarea::placeholder { color: #9A8FB0; }
 .input:focus, .textarea:focus { border-color: var(--cream); outline: none; box-shadow: 0 0 0 3px rgba(247, 212, 190, .25); }
@@ -318,7 +321,7 @@ strong.album { font-weight: 800; }
 .radio-cta .h2 { font-size: clamp(22px, 1.6vw + 16px, 28px); }
 .radio-cta .btn { width: 100%; min-width: 0; padding: 0 20px; letter-spacing: 1.5px; }
 .radio-cta { grid-template-columns: 104px minmax(0, 1fr); align-items: start; }
-.radio-cta--bg { position: relative; overflow: hidden; display: block; padding: 0; min-height: 300px; }
+.radio-cta--bg { position: relative; overflow: hidden; display: block; padding: 0; min-height: 300px; border: 0; box-shadow: 0 18px 48px rgba(0, 0, 0, .5), 0 2px 8px rgba(0, 0, 0, .3); }
 .radio-cta-bg { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: 70% 50%; }
 .radio-cta--bg::before {
   content: ""; position: absolute; inset: 0; z-index: 1;
@@ -335,6 +338,8 @@ strong.album { font-weight: 800; }
 .teaser { padding: 20px; background: rgba(52, 38, 73, .88); border: 1px solid var(--line); border-radius: var(--radius-l); display: flex; flex-direction: column; gap: 12px; }
 @media (min-width: 960px) {
   .screen--confirm.is-active { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); align-items: center; }
+  /* a imagem fica presa no topo e acompanha a rolagem até o fim da página (não centraliza) */
+  .screen--confirm .visual { align-self: start; }
   .screen--confirm .visual { position: sticky; inset: auto; height: calc(100svh - var(--header-h) - var(--safe-top)); }
   .screen--confirm .visual::after { inset: 0 0 0 auto; height: auto; width: 35%; background: linear-gradient(90deg, transparent, var(--bg)); }
   .screen--confirm .content { padding-top: 56px; margin: 0; }

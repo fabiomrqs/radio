@@ -10,6 +10,8 @@ import { isBlocked } from './profanity.js';
 import { track } from './analytics.js';
 import { mountSpotifyEmbed, pauseAllEmbeds } from './embeds.js';
 import { gerarImagemStory } from './share-image.js';
+import { embedPdf } from './pdf-embed.js';
+import { artistsWithPhotos } from './artist-photos.js';
 
 const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => [...root.querySelectorAll(sel)];
@@ -64,17 +66,6 @@ const convite = () => (isPromo()
 /** Texto completo, com o link da playlist logo no começo (o WhatsApp monta o card a partir do primeiro link). */
 function shareText(r) {
   return `Escute ${fmName(r.name)}, a minha rádio GTAVI: The Album ${r.playlistUrl}\n\n${convite()} ${SITE_TEXTO}`;
-}
-/** Nome e foto de um artista pelo oEmbed público do Spotify (quando o artists.json ainda não tem). */
-async function artistFromSpotify(a) {
-  try {
-    const res = await fetch(`https://open.spotify.com/oembed?url=${encodeURIComponent(a.spotifyUrl)}`);
-    if (!res.ok) return false;
-    const o = await res.json();
-    if (!a.name && o.title) a.name = o.title;
-    if (!a.photoUrl && o.thumbnail_url) a.photoUrl = o.thumbnail_url;
-    return true;
-  } catch (_) { return false; }
 }
 const firstName = (artist) => artist.split(/,| feat\.| ft\.| & | x /i)[0].trim();
 
@@ -585,46 +576,30 @@ function enterRadio() {
   $('#playRadioLabel').textContent = r.playlistCreated === false ? 'Ouvir o álbum no Spotify' : 'Escutar no Spotify';
   storyBlob = null;
 
+  // Só aparecem artistas com foto aprovada (assets/img/artistas); o primeiro vira o destaque na capa
+  const lista = artistsWithPhotos([r.featuredArtist, ...(r.artists || [])].filter(Boolean));
   const artist = $('#stationArtist');
   artist.innerHTML = '';
-  const fa = r.featuredArtist;
-  const paintFeatured = () => {
-    artist.innerHTML = '';
-    if (fa?.photoUrl) {
-      const img = new Image(); img.src = fa.photoUrl; img.alt = fa.name || 'Artista em destaque';
-      artist.appendChild(img);
-    } else artist.textContent = '';
-    artist.hidden = !fa?.photoUrl;
-  };
-  paintFeatured();
+  artist.hidden = !lista.length;
+  if (lista.length) {
+    const img = new Image(); img.src = lista[0].photoUrl; img.alt = lista[0].name;
+    artist.appendChild(img);
+  }
 
   const lineup = $('#lineup');
   lineup.innerHTML = '';
-  (r.artists || []).forEach((a) => {
+  lista.forEach((a) => {
     const li = document.createElement('li');
-    // Cada artista leva ao perfil dele no Spotify (atribuição exigida para usar as fotos)
     li.innerHTML = a.spotifyUrl
-      ? '<a class="lineup-link" target="_blank" rel="noopener"><div class="avatar"></div><span></span></a>'
-      : '<div class="avatar"></div><span></span>';
+      ? '<a class="lineup-link" target="_blank" rel="noopener"><div class="avatar has-img"><img alt="" loading="lazy"></div><span></span></a>'
+      : '<div class="avatar has-img"><img alt="" loading="lazy"></div><span></span>';
     const link = $('a', li);
-    if (link) link.href = a.spotifyUrl;
-    const paint = () => {
-      const av = $('.avatar', li);
-      av.innerHTML = '';
-      av.classList.toggle('has-img', !!a.photoUrl);
-      if (a.photoUrl) {
-        const img = new Image(); img.src = a.photoUrl; img.alt = ''; img.loading = 'lazy'; av.appendChild(img);
-      }
-      $('span', li).textContent = a.name ? firstName(a.name) : '';
-      if (link) link.setAttribute('aria-label', a.name ? `${a.name} no Spotify` : 'Artista no Spotify');
-    };
-    paint();
+    if (link) { link.href = a.spotifyUrl; link.setAttribute('aria-label', `${a.name} no Spotify`); }
+    $('img', li).src = a.photoUrl;
+    $('span', li).textContent = a.name;
     lineup.appendChild(li);
-    if ((!a.photoUrl || !a.name) && a.spotifyUrl) {
-      artistFromSpotify(a).then((ok) => { if (ok) { paint(); if (a === fa) paintFeatured(); } });
-    }
   });
-  $('#lineupBlock').hidden = !(r.artists || []).length;
+  $('#lineupBlock').hidden = !lista.length;
 
   const foot = $('#radioFoot'); // opcional
   if (foot) foot.textContent = isPromo()
@@ -714,9 +689,9 @@ const SCREEN_ENTER = {
 /* ============================================================
    Regulamento (embed na home + modal) e links
    ============================================================ */
+const embedsRegulamento = [];
 function fillRules() {
-  const tpl = document.getElementById('tpl-regulamento');
-  $$('[data-slot="rules"]').forEach((slot) => { slot.replaceChildren(tpl.content.cloneNode(true)); });
+  $$('[data-slot="rules"]').forEach((box) => embedsRegulamento.push(embedPdf(box, CONFIG.links.rulesPdf)));
 }
 function fillLinks() {
   $$('[data-link]').forEach((a) => { a.href = CONFIG.links[a.dataset.link] || '#'; });
@@ -728,6 +703,7 @@ let lastFocus = null;
 function openModal() {
   lastFocus = document.activeElement;
   modal.hidden = false;
+  embedsRegulamento.forEach((e) => e.forcar && setTimeout(e.forcar, 0));
   document.body.style.overflow = 'hidden';
   $('#modalClose').focus();
   track('abrir_regulamento');
