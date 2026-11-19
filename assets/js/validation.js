@@ -1,5 +1,7 @@
 /** Validações e máscaras do cadastro. O backend deve repetir todas estas validações. */
 
+export const UFS = 'AC AL AP AM BA CE DF ES GO MA MT MS MG PA PB PR PE PI RJ RN RS RO RR SC SP SE TO'.split(' ');
+
 export const onlyDigits = (v) => String(v || '').replace(/\D/g, '');
 
 export const masks = {
@@ -38,9 +40,10 @@ export function parseBirthDate(v) {
   return `${m[3]}-${m[2]}-${m[1]}`;
 }
 
-export function ageFrom(iso) {
+/** Idade em `refIso` (aaaa-mm-dd) ou hoje. */
+export function ageFrom(iso, refIso = null) {
   const [y, m, d] = iso.split('-').map(Number);
-  const now = new Date();
+  const now = refIso ? new Date(`${refIso}T12:00:00`) : new Date();
   let age = now.getFullYear() - y;
   if (now.getMonth() + 1 < m || (now.getMonth() + 1 === m && now.getDate() < d)) age--;
   return age;
@@ -68,7 +71,7 @@ export function isValidPhone(v) {
 }
 
 /** Valida um campo do cadastro. Retorna a mensagem de erro ou ''. */
-export function validateField(name, value, { minAge = null } = {}) {
+export function validateField(name, value, { minAge = null, minAgeOn = null } = {}) {
   const v = String(value || '').trim();
   switch (name) {
     case 'nome':
@@ -80,7 +83,11 @@ export function validateField(name, value, { minAge = null } = {}) {
       if (!v) return 'Informe sua data de nascimento.';
       const iso = parseBirthDate(v);
       if (!iso) return 'Use uma data válida no formato dd/mm/aaaa.';
-      if (minAge && ageFrom(iso) < minAge) return `É preciso ter ${minAge} anos ou mais para participar.`;
+      if (minAge && ageFrom(iso, minAgeOn) < minAge) {
+        return minAgeOn
+          ? `É preciso ter ${minAge} anos completos até ${minAgeOn.split('-').reverse().join('/')} para participar.`
+          : `É preciso ter ${minAge} anos ou mais para participar.`;
+      }
       return '';
     }
     case 'cpf':
@@ -95,6 +102,8 @@ export function validateField(name, value, { minAge = null } = {}) {
     case 'cidade':
       if (!v) return 'Informe sua cidade.';
       return v.length > 80 ? 'Use no máximo 80 caracteres.' : '';
+    case 'estado':
+      return UFS.includes(v) ? '' : 'Selecione seu estado.';
     default:
       return '';
   }

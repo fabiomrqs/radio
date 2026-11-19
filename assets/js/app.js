@@ -333,9 +333,9 @@ $('#toForm').addEventListener('click', () => {
    Passo 3 – cadastro
    ============================================================ */
 const form = $('#participationForm');
-const FIELD_NAMES = ['nome', 'nascimento', 'cpf', 'email', 'telefone', 'cidade'];
+const FIELD_NAMES = ['nome', 'nascimento', 'cpf', 'email', 'telefone', 'cidade', 'estado'];
 /** Nome do campo no backend → nome do campo no formulário (para erros 422). */
-const BACKEND_FIELD = { name: 'nome', ageConfirmed: 'aceites', birthDate: 'nascimento', cpf: 'cpf', email: 'email', phone: 'telefone', city: 'cidade', consents: 'aceites' };
+const BACKEND_FIELD = { name: 'nome', ageConfirmed: 'aceites', birthDate: 'nascimento', cpf: 'cpf', email: 'email', phone: 'telefone', city: 'cidade', state: 'estado', consents: 'aceites' };
 
 function showFieldError(name, msg) {
   const input = form.elements[name];
@@ -391,6 +391,7 @@ form.addEventListener('submit', async (e) => {
     email: form.elements.email.value.trim().toLowerCase(),
     phone: onlyDigits(form.elements.telefone.value),
     city: form.elements.cidade.value.trim(),
+    state: form.elements.estado.value,
     ageConfirmed: { accepted: true, at: now },
     consents: {
       rules: { accepted: true, at: now },
@@ -524,7 +525,6 @@ async function enterCustomize() {
   if (coverName) coverName.textContent = cover.name;
   const coverWhy = $('#coverWhy');
   if (coverWhy) coverWhy.textContent = `Definida pela sua resposta: “${option.label}”.`;
-  if (!state.radioName) set({ radioName: cover.name });
   nameInput.value = state.radioName;
   checkName(false);
 }
@@ -715,18 +715,10 @@ const SCREEN_ENTER = {
    Regulamento (embed na home + modal) e links
    ============================================================ */
 function fillRules() {
-  $$('[data-slot="rules"]').forEach((slot) => {
-    if (CONFIG.links.rulesEmbedUrl) {
-      slot.innerHTML = '';
-      const f = document.createElement('iframe');
-      f.src = CONFIG.links.rulesEmbedUrl; f.title = 'Regulamento da promoção'; f.loading = 'lazy';
-      slot.appendChild(f);
-      slot.style.padding = '0';
-    } else slot.innerHTML = CONFIG.rulesHtml;
-  });
+  const tpl = document.getElementById('tpl-regulamento');
+  $$('[data-slot="rules"]').forEach((slot) => { slot.replaceChildren(tpl.content.cloneNode(true)); });
 }
 function fillLinks() {
-  setText('promoNumber', CONFIG.promoNumber ? `Número da promo: ${CONFIG.promoNumber}` : 'Número da promo');
   $$('[data-link]').forEach((a) => { a.href = CONFIG.links[a.dataset.link] || '#'; });
   $$('[data-feature]').forEach((el) => { el.hidden = !CONFIG.features[el.dataset.feature]; });
 }

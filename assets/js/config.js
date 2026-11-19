@@ -30,8 +30,9 @@ export const CONFIG = {
    * caso GET /status não responda. A fonte de verdade da fase é sempre o backend.
    */
   dates: {
-    start:   '2026-11-19T00:00:00-03:00', // início das participações
-    end:     '2026-12-07T23:59:59-03:00', // fim das participações
+    // Datas do regulamento (Certificado SPA/ME nº 03.054513/2026)
+    start:   '2026-11-24T11:00:00-03:00', // início das participações
+    end:     '2026-12-07T18:00:00-03:00', // fim das participações
     result:  '2026-12-11T19:00:00-03:00', // divulgação do resultado (data e horário exibidos no site)
     archive: '2026-12-31T00:00:00-03:00', // a partir daqui a home mostra só o resultado
   },
@@ -41,6 +42,8 @@ export const CONFIG = {
     radioNameMax: 100,
     /** Idade mínima para participar, se o regulamento exigir (ex.: 18). null = sem trava no front. */
     minAge: 18,
+    /** Data em que a idade mínima precisa estar completa (regulamento: até o início da promoção). */
+    minAgeOn: '2026-11-24',
   },
 
   features: {
@@ -57,28 +60,15 @@ export const CONFIG = {
     privacy: 'https://privacy.wmg.com/wmi/privacy/por',
     /** Endereço da landing usado no texto de compartilhamento. Trocar pelo domínio final quando estiver configurado. */
     landing: 'https://www.radiogtavithealbum.com/#inicio',
-    /** URL do regulamento para embed via iframe. null = usa rulesHtml abaixo. */
-    rulesEmbedUrl: null,
+    /** PDF oficial do regulamento (link do rodapé, abre em outra aba). O texto da página fica no index.html. */
+    rulesPdf: 'assets/docs/regulamento-gtavi-the-album.pdf',
   },
-
-  /** HTML provisório do regulamento enquanto não há URL de embed. */
-  rulesHtml: `
-    <h3>[REGULAMENTO EMBEDADO AQUI]</h3>
-    <p>Este espaço recebe o texto completo do regulamento da promoção, com rolagem própria.
-    Para usar um embed, preencha <code>CONFIG.links.rulesEmbedUrl</code>.</p>
-    <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.</p>
-    <p>Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-    Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>`,
 
   /**
    * Proteção anti-bot (opcional). Se preenchido, o token do reCAPTCHA v3 / Turnstile
    * é enviado no header X-Captcha-Token. O script do provedor deve ser incluído no index.html.
    */
   captcha: { provider: null, siteKey: null },
-
-  /** Número de certificação da promoção, exibido no rodapé. null = mostra “Número da promo”. */
-  promoNumber: null,
 
   timezone: 'America/Sao_Paulo',
 };
