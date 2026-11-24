@@ -1,278 +1,380 @@
 {
   "albumUrl": "https://open.spotify.com/album/5BYKG4MHfySZthe2W6r7n4",
-  "_comentario": "Ordem = ordem do álbum. title/artist vazios são preenchidos pelo script scripts/atualizar-faixas.mjs ou à mão. released=false mostra a faixa como 'Em breve'.",
+  "_comentario": "As 34 faixas do álbum, na ordem do álbum (id t01–t34 = número da faixa). 'genero' é o usado nas rádios (listas de gêneros enviadas); 'generoNaTabela' é o da tabela, só para conferência. 'abertura' é quem abre a playlist de quem escolhe a faixa.",
   "tracks": [
     {
       "id": "t01",
       "spotifyId": "171rxWDjFvjPeFjSHF4WS5",
-      "title": "",
-      "artist": "",
+      "title": "Crazy for You",
+      "artist": "Lana Del Rey",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "pop",
+      "generoNaTabela": "country",
+      "abertura": "MD CHEFE"
     },
     {
       "id": "t02",
-      "spotifyId": "45TB2WNxWu2X4MmqmCAJnF",
-      "title": "",
-      "artist": "",
+      "spotifyId": "6dUXpM7mnGr7cSpCUQewCs",
+      "title": "Largate",
+      "artist": "Kali Uchis & Helado Negro",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "urban",
+      "generoNaTabela": "country",
+      "abertura": "KAYBLACK"
     },
     {
       "id": "t03",
       "spotifyId": "5tLZfwzwK8KxoBsNwbNFDI",
-      "title": "",
-      "artist": "",
+      "title": "Bright Lights, Big City",
+      "artist": "Keith Richards",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "urban",
+      "generoNaTabela": "country",
+      "abertura": "MC JVILA"
     },
     {
       "id": "t04",
-      "spotifyId": "2QrLrUqdSg5njDVEqq5QFp",
-      "title": "",
-      "artist": "",
+      "spotifyId": "2NliF6CtlWolNA0Jzkw4ba",
+      "title": "Stone Kold Krazy Luv",
+      "artist": "Jesse Johnson & Dâm-Funk",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "urban",
+      "generoNaTabela": "country",
+      "abertura": "MC HARIEL"
     },
     {
       "id": "t05",
-      "spotifyId": "62hqNk13CuFLOpCw1cPMAF",
-      "title": "",
-      "artist": "",
+      "spotifyId": "5AIwo9vC79ce0A7u3DgB1N",
+      "title": "Overtown Lights",
+      "artist": "Stanley Clarke, Yussef Dayes & Robert Glasper",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "latin",
+      "generoNaTabela": "country",
+      "abertura": "BIA SOULL"
     },
     {
       "id": "t06",
-      "spotifyId": "4HCOHRCSQelz2GPX8iTamO",
-      "title": "",
-      "artist": "",
+      "spotifyId": "1bRWSJwUGWCsOih08iFFTV",
+      "title": "Last Thing You Need",
+      "artist": "Morgan Wallen",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "pop",
+      "generoNaTabela": "country",
+      "abertura": "MC PH"
     },
     {
       "id": "t07",
       "spotifyId": "3SLoSFMLOb9jcMsdgyQnOJ",
-      "title": "",
-      "artist": "",
+      "title": "No Me Busques",
+      "artist": "Omar Apollo",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "pop",
+      "generoNaTabela": "latin",
+      "abertura": "BIA SOULL"
     },
     {
       "id": "t08",
-      "spotifyId": "5qGziX9216V8hKJjGg8RtH",
-      "title": "",
-      "artist": "",
+      "spotifyId": "1KVvsmAWUhd3Xyex4IS3DD",
+      "title": "Sexy Magic",
+      "artist": "CA7RIEL & Paco Amoroso, PinkPantheress, Fred again.. & Étienne de Crécy",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "country",
+      "generoNaTabela": "latin",
+      "abertura": "MC MARKS"
     },
     {
       "id": "t09",
       "spotifyId": "2jxAeWwgNBd4XgYPn1POoX",
-      "title": "",
-      "artist": "",
+      "title": "X",
+      "artist": "Jhayco",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "latin",
+      "generoNaTabela": "latin",
+      "abertura": "MC MARI"
     },
     {
       "id": "t10",
-      "spotifyId": "6VDw2mGBIa4csypjOhS6JT",
-      "title": "",
-      "artist": "",
+      "spotifyId": "4DuL1odbViQNnk9o1nol5J",
+      "title": "Suzuki",
+      "artist": "Fuerza Regida",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "latin",
+      "generoNaTabela": "latin",
+      "abertura": "TOKIODK"
     },
     {
       "id": "t11",
-      "spotifyId": "7GtO6G2Iue3yfIYhx36JZn",
-      "title": "",
-      "artist": "",
+      "spotifyId": "2oOtzWzQrHPmvtMAzoms7Q",
+      "title": "Macacoa 2000",
+      "artist": "Rauw Alejandro",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "latin",
+      "generoNaTabela": "latin",
+      "abertura": "MC MARI"
     },
     {
       "id": "t12",
       "spotifyId": "2gKi3NbZSf7aFjaQ3C94Yj",
-      "title": "",
-      "artist": "",
+      "title": "Starting from Zero",
+      "artist": "Justice feat. Michael McDonald",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "urban",
+      "generoNaTabela": "pop",
+      "abertura": "MC PH"
     },
     {
       "id": "t13",
       "spotifyId": "0wK8ZH0T9lvGiM3AaQDoah",
-      "title": "",
-      "artist": "",
+      "title": "Flower in a Hurricane",
+      "artist": "Justice feat. Tame Impala, SZA & King Gizzard & The Lizard Wizard",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "urban",
+      "generoNaTabela": "pop",
+      "abertura": "KAYBLACK"
     },
     {
       "id": "t14",
       "spotifyId": "77er9Mx3nLca8RcfpGrgvv",
-      "title": "",
-      "artist": "",
+      "title": "Go Easy",
+      "artist": "Dua Lipa",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "urban",
+      "generoNaTabela": "pop",
+      "abertura": "MD CHEFE"
     },
     {
       "id": "t15",
       "spotifyId": "3MHXtz0Qu0ksVGcvlp7Mfu",
-      "title": "",
-      "artist": "",
+      "title": "Power Trip",
+      "artist": "Jennie",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "urban",
+      "generoNaTabela": "pop",
+      "abertura": "MC JVILA"
     },
     {
       "id": "t16",
       "spotifyId": "6OX2yNczMDou6xvQCBmjjl",
-      "title": "",
-      "artist": "",
+      "title": "Blood in Your Eyes",
+      "artist": "Tove Lo",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "urban",
+      "generoNaTabela": "pop",
+      "abertura": "KAYBLACK"
     },
     {
       "id": "t17",
       "spotifyId": "3ZxGI5giGDjAT2CL2V9p8f",
-      "title": "",
-      "artist": "",
+      "title": "Fast Emotion",
+      "artist": "Zara Larsson",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "urban",
+      "generoNaTabela": "pop",
+      "abertura": "MC JVILA"
     },
     {
       "id": "t18",
       "spotifyId": "4AUAOxJflfzmblig7NrqGN",
-      "title": "",
-      "artist": "",
+      "title": "Sweet Like Candy",
+      "artist": "Camila Cabello",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "urban",
+      "generoNaTabela": "pop",
+      "abertura": "MC HARIEL"
     },
     {
       "id": "t19",
-      "spotifyId": "4NaBitL0J4PBSODIL1sUg7",
-      "title": "",
-      "artist": "",
+      "spotifyId": "5ES7lNls3ZjYuSfTIdKOvr",
+      "title": "Only One",
+      "artist": "FCUKERS",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "urban",
+      "generoNaTabela": "pop",
+      "abertura": "BIA SOULL"
     },
     {
       "id": "t20",
       "spotifyId": "0wcHjDyKbllhDc7PpvdtU9",
-      "title": "",
-      "artist": "",
+      "title": "Sandunguea",
+      "artist": "Arca",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "urban",
+      "generoNaTabela": "pop",
+      "abertura": "BIA SOULL"
     },
     {
       "id": "t21",
       "spotifyId": "66owIEhGwAjAi2yPmwa2dU",
-      "title": "",
-      "artist": "",
+      "title": "TRDWFE",
+      "artist": "Rina Sawayama",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "pop",
+      "generoNaTabela": "pop",
+      "abertura": "MC MARI"
     },
     {
       "id": "t22",
-      "spotifyId": "4h3tY2zV4easaHEAbHVmgj",
-      "title": "",
-      "artist": "",
+      "spotifyId": "606u5IuPr3lDZR5LnzgxxW",
+      "title": "All Again",
+      "artist": "Rose Gray",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "pop",
+      "generoNaTabela": "pop",
+      "abertura": "BIA SOULL"
     },
     {
       "id": "t23",
       "spotifyId": "68GADd4qLCU16tgCn2W0F5",
-      "title": "",
-      "artist": "",
+      "title": "Dance with Me",
+      "artist": "A Boogie wit da Hoodie feat. Elkan",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "pop",
+      "generoNaTabela": "urban",
+      "abertura": "MC MARI"
     },
     {
       "id": "t24",
       "spotifyId": "1QusS0DZ2KK8ukxsAoFZPK",
-      "title": "",
-      "artist": "",
+      "title": "Bigger",
+      "artist": "Burna Boy",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "pop",
+      "generoNaTabela": "urban",
+      "abertura": "MC MARI"
     },
     {
       "id": "t25",
       "spotifyId": "2Df1qZun61Mrj4xo6ndtTy",
-      "title": "",
-      "artist": "",
+      "title": "Count Up",
+      "artist": "Gunna",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "pop",
+      "generoNaTabela": "urban",
+      "abertura": "BIA SOULL"
     },
     {
       "id": "t26",
       "spotifyId": "1Q8z154tjq6WMJALCOM7gE",
-      "title": "",
-      "artist": "",
+      "title": "Let's Rock",
+      "artist": "Kodak Black & Don Toliver",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "pop",
+      "generoNaTabela": "urban",
+      "abertura": "BIA SOULL"
     },
     {
       "id": "t27",
       "spotifyId": "4XikHdgDDgZT0jDxJXjz9F",
-      "title": "",
-      "artist": "",
+      "title": "Wakin Up Flex",
+      "artist": "Young Thug",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "pop",
+      "generoNaTabela": "urban",
+      "abertura": "MC MARI"
     },
     {
       "id": "t28",
       "spotifyId": "4Fv459S7bhBGbDHJhICbUy",
-      "title": "",
-      "artist": "",
+      "title": "IKYFL",
+      "artist": "Tee Grizzley",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "pop",
+      "generoNaTabela": "urban",
+      "abertura": "MC MARI"
     },
     {
       "id": "t29",
       "spotifyId": "7atOpwxr1aIeRlyGEPNn0C",
-      "title": "",
-      "artist": "",
+      "title": "TF?",
+      "artist": "Don Toliver",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "country",
+      "generoNaTabela": "urban",
+      "abertura": "BIA SOULL"
     },
     {
       "id": "t30",
       "spotifyId": "3g9MD1bGGHDCCB1CbWBhTM",
-      "title": "",
-      "artist": "",
+      "title": "GMA",
+      "artist": "JT",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "country",
+      "generoNaTabela": "urban",
+      "abertura": "MD CHEFE"
     },
     {
       "id": "t31",
       "spotifyId": "4uJTuWY1iJmyXWUtBPEKKt",
-      "title": "",
-      "artist": "",
+      "title": "Don't Chart",
+      "artist": "Cardi B",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "latin",
+      "generoNaTabela": "urban",
+      "abertura": "MC HARIEL"
     },
     {
       "id": "t32",
-      "spotifyId": "2X67K1KTLBg9EU2dMUQC42",
-      "title": "",
-      "artist": "",
+      "spotifyId": "3A9VSHhgR4XuYF60HvVWWr",
+      "title": "That's It",
+      "artist": "Yung Lean feat. Future & Metro Boomin",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "country",
+      "generoNaTabela": "urban",
+      "abertura": "TOKIODK"
     },
     {
       "id": "t33",
       "spotifyId": "2mLHtW9nUOtZPvYcW1iqFo",
-      "title": "",
-      "artist": "",
+      "title": "Ahh Yea",
+      "artist": "Playboi Carti",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "country",
+      "generoNaTabela": "urban",
+      "abertura": "KAYBLACK"
     },
     {
       "id": "t34",
       "spotifyId": "2fGCjJeXtoeqEDML2RFhVf",
-      "title": "",
-      "artist": "",
+      "title": "Rhyno",
+      "artist": "Travis Scott",
       "coverUrl": null,
-      "released": true
+      "released": true,
+      "genero": "country",
+      "generoNaTabela": "urban",
+      "abertura": "MD CHEFE"
     }
   ]
 }
