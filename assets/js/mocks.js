@@ -55,6 +55,7 @@ const withSpotifyUrl = (a) => ({ ...a, spotifyUrl: a.spotifyUrl || (a.spotifyId 
 const error = (status, code, message, fields) => new ApiError(status, code, message, fields);
 
 export const api = {
+  async getRadio() { await wait(300); return { status: 'ready', playlistUrl: 'https://open.spotify.com/album/5BYKG4MHfySZthe2W6r7n4' }; },
   registerVisit() {},
   async getStatus() {
     await wait(150);
@@ -97,6 +98,7 @@ export const api = {
       cover: { id: capa, name: opt.cover.name, imageUrl: `assets/img/capas/${capa}.jpg` },
       playlistUrl: 'https://open.spotify.com/album/5BYKG4MHfySZthe2W6r7n4',
       playlistCreated: false,
+      status: 'ready',
       shareUrl: location.origin + location.pathname + '#inicio',
       // O backend escolhe os artistas da playlist gerada; aqui usamos todos os do artists.json
       featuredArtist: artists[0] || null,

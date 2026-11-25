@@ -71,6 +71,8 @@ const real = {
   getQuiz: () => request('GET', '/quiz'),
   createParticipation: (payload) => request('POST', '/participations', payload, { captchaAction: 'participation' }),
   createRadio: (payload) => request('POST', '/radios', payload, { captchaAction: 'radio' }),
+  /** Status de uma rádio na fila de criação de playlists. */
+  getRadio: (id) => request('GET', `/radios/${encodeURIComponent(id)}`, null, { timeoutMs: 15000 }),
   /** Soma 1 no contador de visitas do painel (sem dados pessoais). Nunca quebra a página. */
   registerVisit: () => fetch(CONFIG.apiBase + '/acesso', { method: 'POST', keepalive: true }).catch(() => {}),
 };

@@ -532,20 +532,66 @@ function checkName(showEmpty = true) {
 }
 nameInput.addEventListener('input', () => { set({ radioName: nameInput.value }); checkName(); });
 
+/* ---------- Playlist na fila do Spotify ---------- */
+const ALBUM_URL = 'https://open.spotify.com/album/5BYKG4MHfySZthe2W6r7n4';
+function mensagemFila(seg, espera) {
+  if (espera > 0) return `Muita gente criando rádio agora. Sua vez chega em instantes… (${espera}s)`;
+  if (seg < 8) return 'Escolhendo as faixas da sua estação…';
+  if (seg < 25) return 'Muita gente criando rádio agora. Sua vez já vai chegar!';
+  return 'Quase lá! Estamos finalizando a sua playlist no Spotify…';
+}
+/** Atualiza a rádio com o resultado da fila. */
+function aplicarStatus(radio, st) {
+  if (st.status === 'ready') return { ...radio, status: 'ready', playlistUrl: st.playlistUrl, playlistCreated: true };
+  if (st.status === 'failed') return { ...radio, status: 'failed', playlistUrl: ALBUM_URL, playlistCreated: false };
+  return { ...radio, waitSeconds: st.waitSeconds };
+}
+/** Consulta a fila a cada 3s por até `limite` ms, mostrando mensagens no loading. */
+async function esperarPlaylist(radio, limite) {
+  const inicio = Date.now();
+  const msg = $('#radioLoadingMsg');
+  let atual = radio;
+  while (Date.now() - inicio < limite) {
+    if (msg) msg.textContent = mensagemFila((Date.now() - inicio) / 1000, atual.waitSeconds || 0);
+    await new Promise((ok) => setTimeout(ok, 3000));
+    try { atual = aplicarStatus(atual, await api.getRadio(radio.radioId)); } catch (_) { /* tenta de novo */ }
+    if (atual.status !== 'pending') return atual;
+  }
+  return atual; // segue pendente: a tela da rádio continua acompanhando
+}
+let acompanhando = null;
+/** Na tela da rádio, se a playlist ainda estiver na fila, consulta a cada 8s e atualiza quando ficar pronta. */
+function acompanharNaTela() {
+  if (acompanhando || state.radio?.status !== 'pending') return;
+  acompanhando = setInterval(async () => {
+    try {
+      const nova = aplicarStatus(state.radio, await api.getRadio(state.radio.radioId));
+      if (nova.status !== 'pending') {
+        clearInterval(acompanhando); acompanhando = null;
+        set({ radio: nova });
+        if (current === 'radio') enterRadio();
+      }
+    } catch (_) { /* tenta na próxima */ }
+  }, 8000);
+}
+
 $('#toRadio').addEventListener('click', async () => {
   if (!checkName()) { nameInput.focus(); return; }
   const btn = $('#toRadio');
   const overlay = $('#radioLoading');
   setLoading(btn, true); overlay.hidden = false;
+  if ($('#radioLoadingMsg')) $('#radioLoadingMsg').textContent = 'Escolhendo as faixas da sua estação…';
   try {
-    const radio = await api.createRadio({
+    let radio = await api.createRadio({
       participationId: state.participationId, // null fora da promoção
       trackId: state.trackId, // define o gênero da rádio quando não há inscrição
       answers: state.quizAnswers,
       name: nameInput.value.trim(),
     });
+    // Playlist na fila do Spotify: segue mostrando o loading enquanto ela é criada
+    if (radio.status === 'pending') radio = await esperarPlaylist(radio, 120000);
     set({ radio });
-    track('radio_gerada', { cover_id: radio.cover?.id });
+    track('radio_gerada', { cover_id: radio.cover?.id, status: radio.status });
     go('radio');
   } catch (err) {
     if (err instanceof ApiError && err.fields?.name) {
@@ -570,10 +616,17 @@ function enterRadio() {
   cover.alt = `Capa da rádio ${r.name}`;
   $('#stationName').textContent = fmName(r.name);
   $('#radioTitleName').textContent = fmName(r.name);
-  $('#stationLink').textContent = r.playlistUrl.replace(/^https?:\/\//, '');
-  $('#playRadio').href = r.playlistUrl;
+  const pendente = r.status === 'pending' || !r.playlistUrl;
+  $('#stationLink').textContent = pendente ? 'Criando sua playlist no Spotify…' : r.playlistUrl.replace(/^https?:\/\//, '');
+  const play = $('#playRadio');
+  if (pendente) { play.removeAttribute('href'); play.setAttribute('aria-disabled', 'true'); } else { play.href = r.playlistUrl; play.removeAttribute('aria-disabled'); }
+  play.classList.toggle('is-pending', pendente);
+  // Compartilhar só depois que a playlist existir (o link vai na imagem e no texto)
+  $$('[data-share]').forEach((b) => { b.disabled = pendente; });
+  $('#sharePending').hidden = !pendente;
+  acompanharNaTela();
   // Se o Spotify não criou a playlist, o botão leva ao álbum: o texto diz isso
-  $('#playRadioLabel').textContent = r.playlistCreated === false ? 'Ouvir o álbum no Spotify' : 'Escutar no Spotify';
+  $('#playRadioLabel').textContent = pendente ? 'Sua playlist está quase pronta…' : r.playlistCreated === false ? 'Ouvir o álbum no Spotify' : 'Escutar no Spotify';
   storyBlob = null;
 
   // Só aparecem artistas com foto aprovada (assets/img/artistas); o primeiro vira o destaque na capa

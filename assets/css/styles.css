@@ -405,6 +405,8 @@ select.input option { color: var(--text); background: var(--bg-deep); }
 }
 .share-btn:hover { border-color: var(--cream); background: var(--surface-hi); }
 .share-btn.is-loading { opacity: .6; pointer-events: none; }
+.share-btn:disabled { opacity: .45; cursor: not-allowed; }
+.btn.is-pending { opacity: .75; pointer-events: none; }
 
 /* ---------- Resultado ---------- */
 .winner { padding: 28px 20px; border-radius: var(--radius-l); background: var(--surface); border: 1.5px solid var(--accent); text-align: center; display: flex; flex-direction: column; gap: 10px; align-items: center; }

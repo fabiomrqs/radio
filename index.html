@@ -439,6 +439,7 @@
     </div>
     <section class="share" aria-labelledby="t-share">
       <h2 class="field-label" id="t-share">Compartilhe sua rádio</h2>
+      <p class="note" id="sharePending" hidden>Os botões liberam assim que a sua playlist ficar pronta.</p>
       <div class="share-grid">
         <button type="button" class="share-btn" data-share="instagram">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
@@ -492,6 +493,7 @@
 <div class="loading-overlay" id="radioLoading" hidden role="status" aria-live="polite">
   <div class="eq" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
   <p class="h2">Sintonizando a sua rádio…</p>
+  <p class="small" id="radioLoadingMsg" style="max-width:320px">Escolhendo as faixas da sua estação…</p>
 </div>
 
 <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
